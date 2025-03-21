@@ -75,6 +75,7 @@ export class SyncChannelAnalyticsScheduler {
         timestamp: new Date().toISOString(),
         status: 'success',
         impressions: impressions.slice(0, 1),
+        accountId: 1,
       });
 
       console.log(`[${new Date().toISOString()}] Sync completed successfully.`);
