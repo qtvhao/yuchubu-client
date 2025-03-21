@@ -74,7 +74,7 @@ export class SyncChannelAnalyticsScheduler {
       await this.publisher.publish({
         timestamp: new Date().toISOString(),
         status: 'success',
-        impressions,
+        impressions: impressions.slice(0, 1),
       });
 
       console.log(`[${new Date().toISOString()}] Sync completed successfully.`);
