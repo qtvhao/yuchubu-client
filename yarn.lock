@@ -932,12 +932,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ystudio-analytics-agent@github:qtvhao/ystudio-analytics-agent":
+"ystudio-analytics-agent@github:qtvhao/ystudio-analytics-agent#180e8d5dc4bc216ecc508912955f7b64c8f4f42d":
   version: 1.0.0
-  resolution: "ystudio-analytics-agent@git+ssh://git@github.com/qtvhao/ystudio-analytics-agent.git#commit=4017047d7b397de7c8ed55fec4c435846fa292c1"
+  resolution: "ystudio-analytics-agent@https://github.com/qtvhao/ystudio-analytics-agent.git#commit=180e8d5dc4bc216ecc508912955f7b64c8f4f42d"
   dependencies:
     puppeteer: ^24.4.0
-  checksum: ca036b1508d0f4222b78db2997f6a0909c8c9a6df98afaced783d86c500593faadcc31101f6c04228c3dfd05f744f70eac3470fef587361de4d890fd68a89a85
+  checksum: 6b04782b62346cd3be423d5a1ec421b7c79208af927c90f5b18a70fbd718fafebf9f2877ba87c20861b6e4fdee802c1444c99ecb45a0e29c47a3500ccd6256ee
   languageName: node
   linkType: hard
 
@@ -947,7 +947,7 @@ __metadata:
   dependencies:
     "@types/node-cron": ^3.0.11
     node-cron: ^3.0.3
-    ystudio-analytics-agent: "github:qtvhao/ystudio-analytics-agent"
+    ystudio-analytics-agent: "github:qtvhao/ystudio-analytics-agent#180e8d5dc4bc216ecc508912955f7b64c8f4f42d"
   languageName: unknown
   linkType: soft
 
