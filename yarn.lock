@@ -47,6 +47,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node-cron@npm:^3.0.11":
+  version: 3.0.11
+  resolution: "@types/node-cron@npm:3.0.11"
+  checksum: a73f69bcca52a5f3b1671cfb00a8e4a1d150d0aef36a611564a2f94e66b6981bade577e267ceeeca6fcee241768902d55eb8cf3a81f9ef4ed767a23112fdb16d
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:*":
   version: 22.13.11
   resolution: "@types/node@npm:22.13.11"
@@ -938,6 +945,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "yuchubu-client@workspace:."
   dependencies:
+    "@types/node-cron": ^3.0.11
     node-cron: ^3.0.3
     ystudio-analytics-agent: "github:qtvhao/ystudio-analytics-agent"
   languageName: unknown
