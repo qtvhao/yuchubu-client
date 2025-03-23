@@ -2,6 +2,9 @@ import { SyncChannelAnalyticsScheduler } from "./schedulers/SyncChannelAnalytics
 
 // Instantiate and start the scheduler
 const analyticsScheduler = new SyncChannelAnalyticsScheduler();
+analyticsScheduler.on('syncSuccess', async () => {
+  console.log('syncSuccess')
+})
 analyticsScheduler.start();
 
 // Optional: handle graceful shutdown

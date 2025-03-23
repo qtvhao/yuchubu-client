@@ -2,14 +2,37 @@ import cron, { ScheduledTask } from 'node-cron';
 import { YoutubeStudio } from 'ystudio-analytics-agent/dist/YoutubeStudio.js';
 import { PublisherService } from '../utils/PublisherService.js';
 
+type EventCallback = (data?: any) => void;
+
 export class SyncChannelAnalyticsScheduler {
   private task: ScheduledTask | null = null;
   private studio: YoutubeStudio | null = null;
   private publisher: PublisherService;
+  private callbacks: Record<string, EventCallback[]> = {};
 
   constructor(private scheduleTime: string = '0 2 * * *') {
     // Default schedule: every day at 2 AM
     this.publisher = new PublisherService('sync-channel-analytics');
+  }
+
+  /**
+   * Register an event callback
+   */
+  public on(event: 'start' | 'stop' | 'syncStart' | 'syncSuccess' | 'syncFailure', callback: EventCallback): void {
+    if (!this.callbacks[event]) {
+      this.callbacks[event] = [];
+    }
+    this.callbacks[event].push(callback);
+  }
+
+  /**
+   * Emit an event with optional data
+   */
+  private emit(event: string, data?: any): void {
+    const eventCallbacks = this.callbacks[event];
+    if (eventCallbacks && eventCallbacks.length > 0) {
+      eventCallbacks.forEach(cb => cb(data));
+    }
   }
 
   /**
@@ -54,6 +77,8 @@ export class SyncChannelAnalyticsScheduler {
       this.studio = null;
       console.log('YoutubeStudio instance closed.');
     }
+
+    this.emit('stop');
   }
 
   /**
@@ -62,8 +87,11 @@ export class SyncChannelAnalyticsScheduler {
   private async syncAnalytics(): Promise<void> {
     console.log(`[${new Date().toISOString()}] Syncing channel analytics...`);
 
+    this.emit('syncStart');
+
     if (!this.studio) {
       console.error('YoutubeStudio is not initialized.');
+      this.emit('syncFailure', { message: 'YoutubeStudio is not initialized.' });
       return;
     }
 
@@ -79,6 +107,8 @@ export class SyncChannelAnalyticsScheduler {
       });
 
       console.log(`[${new Date().toISOString()}] Sync completed successfully.`);
+
+      this.emit('syncSuccess', { impressions });
     } catch (error: any) {
       console.error(`[${new Date().toISOString()}] Sync failed:`, error.message);
 
@@ -87,6 +117,8 @@ export class SyncChannelAnalyticsScheduler {
         status: 'failure',
         error: error.message
       });
+
+      this.emit('syncFailure', { message: error.message });
     }
   }
 }
