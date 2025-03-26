@@ -27,6 +27,9 @@ export class SchedulerManager {
       const success = await this.dispatcher.dispatchTaskWithRetry();
 
       totalProfiler.end();
+      // ✅ Finished: Total dispatch process — 127.43s
+      // ✅ Finished: Total dispatch process — 178.87s
+      // ✅ Finished: Total dispatch process — 154.48s
 
       if (success) {
         console.log('Dispatch succeeded. Stopping scheduler.');
