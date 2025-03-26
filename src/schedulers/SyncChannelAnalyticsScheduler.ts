@@ -7,6 +7,11 @@ dotenv.config()
 
 type EventCallback = (data?: any) => void;
 
+const ACCOUNT_ID = Number(process.env.ACCOUNT_ID);
+if (isNaN(ACCOUNT_ID)) {
+  throw new Error('ACCOUNT_ID environment variable must be a valid number');
+}
+
 export class SyncChannelAnalyticsScheduler {
   private task: ScheduledTask | null = null;
   private studio: YoutubeStudio | null = null;
@@ -106,7 +111,7 @@ export class SyncChannelAnalyticsScheduler {
         timestamp: new Date().toISOString(),
         status: 'success',
         impressions: impressions.slice(0, 1),
-        accountId: process.env.ACCOUNT_ID || 1,
+        accountId: ACCOUNT_ID,
       });
 
       console.log(`[${new Date().toISOString()}] Sync completed successfully.`);
