@@ -1,4 +1,4 @@
-import { SchedulerManager } from "./SchedulerManager";
+import { SchedulerManager } from "./SchedulerManager.js";
 
 const schedulerManager = new SchedulerManager();
 schedulerManager.start();

@@ -1,6 +1,9 @@
 import axios, { AxiosResponse } from 'axios';
 import { Profiler } from './Profiler.js';
 import { Utility } from './Utility.js';
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 
 class Config {
@@ -34,7 +37,7 @@ export class TaskDispatcher {
     private async dispatchTask(): Promise<'success' | 'retry'> {
       const dispatchProfiler = new Profiler('Dispatch request');
       const response: AxiosResponse = await axios.post(
-        'https://http-harbor-eidos-production-80.schnworks.com/task/dispatch?accountId=1', {},
+        'https://http-harbor-eidos-production-80.schnworks.com/task/dispatch?accountId=' + (process.env.ACCOUNT_ID || 1), {},
         {
           validateStatus: function (status) {
             return status === 200 || status === 404;

@@ -1,6 +1,9 @@
 import cron, { ScheduledTask } from 'node-cron';
 import { YoutubeStudio } from 'ystudio-analytics-agent/dist/YoutubeStudio.js';
 import { PublisherService } from '../utils/PublisherService.js';
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 type EventCallback = (data?: any) => void;
 
@@ -103,7 +106,7 @@ export class SyncChannelAnalyticsScheduler {
         timestamp: new Date().toISOString(),
         status: 'success',
         impressions: impressions.slice(0, 1),
-        accountId: 1,
+        accountId: process.env.ACCOUNT_ID || 1,
       });
 
       console.log(`[${new Date().toISOString()}] Sync completed successfully.`);
