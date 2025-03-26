@@ -23,7 +23,7 @@ export class PublisherService {
             }
 
             const data = await response.json();
-            console.log('Publish successful:', data);
+            console.log('Publish successful:', data, payload);
         } catch (error) {
             console.error('Error publishing to topic:', error);
         }
