@@ -5,54 +5,67 @@ import { TaskDispatcher } from './TaskDispatcher.js';
 // === Scheduler Setup ===
 
 export class SchedulerManager {
-  private scheduler: SyncChannelAnalyticsScheduler;
-  private dispatcher: TaskDispatcher;
+  private analyticsSyncScheduler: SyncChannelAnalyticsScheduler;
+  private taskDispatcher: TaskDispatcher;
 
   constructor() {
-    this.scheduler = new SyncChannelAnalyticsScheduler();
-    this.dispatcher = new TaskDispatcher();
-    this.scheduler.on('syncSuccess', this.handleSyncSuccess.bind(this));
-    process.on('SIGINT', this.handleShutdown.bind(this));
+    this.analyticsSyncScheduler = new SyncChannelAnalyticsScheduler();
+    this.taskDispatcher = new TaskDispatcher();
+    this.analyticsSyncScheduler.on('syncSuccess', this.handleSyncSuccess.bind(this));
+    process.on('SIGINT', this.handleShutdownSignal.bind(this));
   }
 
   start(): void {
-    this.scheduler.start();
+    this.analyticsSyncScheduler.start();
   }
 
   private async handleSyncSuccess(): Promise<void> {
-    console.log('syncSuccess');
-    const totalProfiler = new Profiler('Total dispatch process');
+    const totalProfiler = this.startTotalDispatchProfiler();
 
     try {
-      const success = await this.dispatcher.dispatchTaskWithRetry();
-
+      const taskId = await this.taskDispatcher.dispatchTaskWithRetry();
       totalProfiler.end();
-      // ✅ Finished: Total dispatch process — 127.43s
-      // ✅ Finished: Total dispatch process — 178.87s
-      // ✅ Finished: Total dispatch process — 154.48s
 
-      if (success) {
-        console.log('Dispatch succeeded. Stopping scheduler.');
-        this.stopScheduler(0);
+      if (taskId) {
+        await this.handleDispatchSuccess(taskId);
       } else {
-        console.error('Dispatch failed after retries. Stopping scheduler.');
-        this.stopScheduler(1);
+        this.handleDispatchFailure(null);
       }
 
     } catch (error) {
-      console.error('Unexpected error occurred:', (error as Error).message);
-      this.stopScheduler(1);
+      totalProfiler.end();
+      this.handleDispatchFailure(error as Error);
     }
   }
 
-  private handleShutdown(): void {
-    console.log('Gracefully shutting down scheduler...');
-    this.stopScheduler(0);
+  private startTotalDispatchProfiler(): Profiler {
+    console.log('syncSuccess');
+    return new Profiler('Total dispatch process');
   }
 
-  private stopScheduler(exitCode: number = 0): void {
+  private async handleDispatchSuccess(taskId: string): Promise<void> {
+    console.log('Dispatch succeeded.');
+    await this.taskDispatcher.pollTaskStatusUntilSuccess(taskId, true);
+    this.shutdownScheduler(0);
+  }
+
+  private handleDispatchFailure(error: Error | null): void {
+    if (error) {
+      console.error('Unexpected error occurred:', error.message);
+    } else {
+      console.error('Dispatch failed after retries. Stopping scheduler.');
+    }
+    this.shutdownScheduler(1);
+  }
+
+  private handleShutdownSignal(): void {
+    console.log('Gracefully shutting down scheduler...');
+    this.shutdownScheduler(0);
+  }
+
+  private shutdownScheduler(exitCode: number = 0): void {
     console.log('Stopping scheduler...');
-    this.scheduler.stop();
+    this.analyticsSyncScheduler.stop();
     process.exit(exitCode);
   }
 }

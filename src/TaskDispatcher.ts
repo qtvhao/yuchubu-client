@@ -5,22 +5,40 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
+interface DispatchSuccessResponse {
+  message: string;
+  taskId: string;
+}
+
+interface DispatchErrorResponse {
+  message: string;
+  error: string;
+  taskId: string;
+}
+
+function isDispatchErrorResponse(
+  res: DispatchSuccessResponse | DispatchErrorResponse
+): res is DispatchErrorResponse {
+  return 'error' in res;
+}
+
 class Config {
   static readonly MAX_RETRIES = 300;
   static readonly RETRY_DELAY_MS = 2_000; // 2 seconds delay between retries
+  static readonly BASE_URL = 'https://http-harbor-eidos-production-80.schnworks.com';
 }
 
 // === Task Dispatching Logic ===
 
 export class TaskDispatcher {
-    async dispatchTaskWithRetry(): Promise<boolean> {
+    async dispatchTaskWithRetry(): Promise<string | null> {
       for (let attempt = 1; attempt <= Config.MAX_RETRIES; attempt++) {
         const attemptProfiler = new Profiler(`Attempt ${attempt}`);
         const result = await this.dispatchTask();
         attemptProfiler.end();
 
-        if (result === 'success') {
-          return true;
+        if (!isDispatchErrorResponse(result)) {
+          return result.taskId;
         }
 
         if (attempt < Config.MAX_RETRIES) {
@@ -30,13 +48,13 @@ export class TaskDispatcher {
       }
 
       console.error('Max retries reached.');
-      return false;
+      return null;
     }
 
-    private async dispatchTask(): Promise<'success' | 'retry'> {
+    private async dispatchTask(): Promise<DispatchSuccessResponse | DispatchErrorResponse> {
       const dispatchProfiler = new Profiler('Dispatch request');
-      const response: AxiosResponse = await axios.post(
-        `https://http-harbor-eidos-production-80.schnworks.com/task/dispatch?accountId=${process.env.ACCOUNT_ID}`, {},
+      const response: AxiosResponse<DispatchSuccessResponse | DispatchErrorResponse> = await axios.post(
+        `${Config.BASE_URL}/task/dispatch?accountId=${process.env.ACCOUNT_ID}`, {},
         {
           validateStatus: function (status) {
             return status === 200 || status === 404;
@@ -45,22 +63,67 @@ export class TaskDispatcher {
       );
       dispatchProfiler.end();
 
-      console.log({ ...response.data });
-      const errorField = response.data?.error;
+      return response.data;
+    }
 
-      console.log('Received response:', errorField);
+    async checkTaskStatus(taskId: string): Promise<'success' | 'retry'> {
+      const statusProfiler = new Profiler(`Check status for task ${taskId}`);
+      const response: AxiosResponse = await axios.get(
+        `${Config.BASE_URL}/tasks/completed/${taskId}`,
+        {
+          validateStatus: function (status) {
+            return status === 200 || status === 404;
+          }
+        }
+      );
+      statusProfiler.end();
 
-      if (typeof errorField !== 'string') {
-        console.log('Error field is not a string. Considering it a success.');
+      console.log('Task status response:', response.data);
+
+      if (response.status === 404) {
+        console.warn(`Task ${taskId} not found (404). Retrying...`);
+        return 'retry';
+      }
+
+      const downloads = response.data?.downloads;
+      if (Array.isArray(downloads) && downloads.length > 0) {
+        console.log(`Task ${taskId} completed successfully. Downloads:`, downloads);
         return 'success';
       }
 
-      if (errorField === '') {
-        console.log('Task dispatched successfully (empty error string).');
-        return 'success';
-      }
-
-      console.warn('Task dispatch returned an error string:', errorField);
+      console.warn(`Task ${taskId} status indicates retry needed.`);
       return 'retry';
+    }
+
+    async pollTaskStatusUntilSuccess(taskId: string, debug: boolean = false): Promise<'success' | 'timeout'> {
+      const MAX_POLLING_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+      const POLL_INTERVAL_MS = 2000; // Poll every 2 seconds
+      const startTime = Date.now();
+
+      if (debug) {
+        console.debug(`Starting polling for task ${taskId}`);
+      }
+
+      while (Date.now() - startTime < MAX_POLLING_DURATION_MS) {
+        const status = await this.checkTaskStatus(taskId);
+        if (debug) {
+          console.debug(`Polled status: ${status} at ${new Date().toISOString()}`);
+        }
+
+        if (status === 'success') {
+          if (debug) {
+            console.debug(`Polling ended with success for task ${taskId}`);
+          }
+          return 'success';
+        }
+
+        await Utility.delay(POLL_INTERVAL_MS);
+      }
+
+      console.warn(`Polling timed out after ${MAX_POLLING_DURATION_MS / 1000} seconds.`);
+      if (debug) {
+        console.debug(`Polling ended with timeout for task ${taskId}`);
+      }
+      return 'timeout';
     }
 }
