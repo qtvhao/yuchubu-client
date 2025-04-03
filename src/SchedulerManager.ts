@@ -1,6 +1,8 @@
 import { Profiler } from './Profiler.js';
 import { SyncChannelAnalyticsScheduler } from './schedulers/SyncChannelAnalyticsScheduler.js';
 import { TaskDispatcher } from './TaskDispatcher.js';
+import { writeFileSync } from 'fs';
+import { join } from 'path';
 
 // === Scheduler Setup ===
 
@@ -46,6 +48,12 @@ export class SchedulerManager {
   private async handleDispatchSuccess(taskId: string): Promise<void> {
     console.log('Dispatch succeeded.');
     await this.taskDispatcher.pollTaskStatusUntilSuccess(taskId, true);
+    const [downloadBuffer] = await this.taskDispatcher.downloadTaskResults(taskId);
+    
+    const outputPath = join(process.cwd(), `task-${taskId}.mp4`);
+    writeFileSync(outputPath, downloadBuffer);
+    console.log(`Downloaded buffer saved to ${outputPath}`);
+
     this.shutdownScheduler(0);
   }
 

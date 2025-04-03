@@ -126,4 +126,44 @@ export class TaskDispatcher {
       }
       return 'timeout';
     }
+
+    async downloadTaskResult(taskId: string, downloadIndex: number = 0): Promise<Buffer> {
+      const downloadUrl = `${Config.BASE_URL}/tasks/completed/${taskId}/downloads/${downloadIndex}`;
+      const response = await axios.get(downloadUrl, {
+        responseType: 'arraybuffer',
+        validateStatus: function (status) {
+          return status === 200;
+        }
+      });
+
+      return Buffer.from(response.data);
+    }
+
+    async downloadTaskResults(taskId: string): Promise<Buffer[]> {
+      const response = await axios.get(`${Config.BASE_URL}/tasks/completed/${taskId}`, {
+        validateStatus: function (status) {
+          return status === 200;
+        }
+      });
+
+      const downloads = response.data?.downloads;
+      if (!Array.isArray(downloads) || downloads.length === 0) {
+        throw new Error(`No downloads found for task ${taskId}`);
+      }
+
+      const buffers: Buffer[] = [];
+
+      for (let i = 0; i < downloads.length; i++) {
+        const downloadUrl = `${Config.BASE_URL}/tasks/completed/${taskId}/downloads/${i}`;
+        const fileResponse = await axios.get(downloadUrl, {
+          responseType: 'arraybuffer',
+          validateStatus: function (status) {
+            return status === 200;
+          }
+        });
+        buffers.push(Buffer.from(fileResponse.data));
+      }
+
+      return buffers;
+    }
 }
