@@ -96,7 +96,7 @@ export class TaskDispatcher {
     }
 
     async pollTaskStatusUntilSuccess(taskId: string, debug: boolean = false): Promise<'success' | 'timeout'> {
-      const MAX_POLLING_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+      const MAX_POLLING_DURATION_MS = 15 * 60 * 1000; // 15 minutes
       const POLL_INTERVAL_MS = 2000; // Poll every 2 seconds
       const startTime = Date.now();
 
