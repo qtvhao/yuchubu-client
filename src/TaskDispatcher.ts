@@ -86,6 +86,16 @@ export class TaskDispatcher {
     );
     statusProfiler.end();
 
+    const progressResponse: AxiosResponse = await axios.get(
+      `${Config.BASE_URL}/tasks/progress/${taskId}`,
+      {
+        validateStatus: function (status) {
+          return status === 200 || status === 404;
+        }
+      }
+    );
+    const progressBar = progressResponse.data?.progressBar
+    console.log(progressBar)
     console.log('Task status response:', response.data);
 
     if (response.status === 404) {

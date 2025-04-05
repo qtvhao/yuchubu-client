@@ -58,11 +58,19 @@ export class SchedulerManager {
   }
 
   private handleDispatchFailure(error: Error | null): void {
-    if (error) {
-      console.error('Unexpected error occurred:', error.message);
-    } else {
+    if (!error) {
       console.error('Dispatch failed after retries. Stopping scheduler.');
+      this.shutdownScheduler(1);
+      return;
     }
+
+    console.error('Unexpected error occurred:', error.message);
+
+    const responseBody = (error as any)?.response?.data;
+    if (responseBody) {
+      console.error('HTTP response body:', responseBody);
+    }
+
     this.shutdownScheduler(1);
   }
 
