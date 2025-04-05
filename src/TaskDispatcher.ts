@@ -54,7 +54,9 @@ export class TaskDispatcher {
     private async dispatchTask(): Promise<DispatchSuccessResponse | DispatchErrorResponse> {
       const dispatchProfiler = new Profiler('Dispatch request');
       const response: AxiosResponse<DispatchSuccessResponse | DispatchErrorResponse> = await axios.post(
-        `${Config.BASE_URL}/task/dispatch?accountId=${process.env.ACCOUNT_ID}`, {},
+        `${Config.BASE_URL}/task/dispatch`, {
+          accountId: process.env.ACCOUNT_ID
+        },
         {
           validateStatus: function (status) {
             return status === 200 || status === 404;
