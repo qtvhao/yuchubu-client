@@ -4,6 +4,10 @@ import { Utility } from './Utility.js';
 import dotenv from 'dotenv'
 
 dotenv.config()
+const ACCOUNT_ID = Number(process.env.ACCOUNT_ID);
+if (isNaN(ACCOUNT_ID)) {
+  throw new Error(`Invalid ACCOUNT_ID environment variable: ${process.env.ACCOUNT_ID}`);
+}
 
 interface DispatchSuccessResponse {
   message: string;
@@ -52,10 +56,12 @@ export class TaskDispatcher {
     }
 
     private async dispatchTask(): Promise<DispatchSuccessResponse | DispatchErrorResponse> {
+      const accountId = ACCOUNT_ID;
+
       const dispatchProfiler = new Profiler('Dispatch request');
       const response: AxiosResponse<DispatchSuccessResponse | DispatchErrorResponse> = await axios.post(
         `${Config.BASE_URL}/task/dispatch`, {
-          accountId: process.env.ACCOUNT_ID
+          accountId
         },
         {
           validateStatus: function (status) {
