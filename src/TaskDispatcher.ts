@@ -75,7 +75,6 @@ export class TaskDispatcher {
   }
 
   async checkTaskStatus(taskId: string): Promise<'success' | 'retry'> {
-    const statusProfiler = new Profiler(`Check status for task ${taskId}`);
     const response: AxiosResponse = await axios.get(
       `${Config.BASE_URL}/tasks/completed/${taskId}`,
       {
@@ -84,7 +83,6 @@ export class TaskDispatcher {
         }
       }
     );
-    statusProfiler.end();
 
     const progressResponse: AxiosResponse = await axios.get(
       `${Config.BASE_URL}/tasks/progress/${taskId}`,
@@ -95,8 +93,10 @@ export class TaskDispatcher {
       }
     );
     const progressBar = progressResponse.data?.progressBar
-    console.log(progressBar)
-    console.log('Task status response:', response.data);
+    const percent = progressResponse.data?.progress;
+    const progressWithPercent = percent != null ? `${progressBar} ${percent}%` : progressBar;
+    process.stdout.write('\x1b[2K\r'); // Clear the line
+    process.stdout.write(progressWithPercent + '\r');
 
     if (response.status === 404) {
       console.warn(`Task ${taskId} not found (404). Retrying...`);
