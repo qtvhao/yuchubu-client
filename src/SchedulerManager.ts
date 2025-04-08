@@ -51,7 +51,7 @@ export class SchedulerManager {
     console.log('🚀 Dispatch succeeded.');
     await this.taskDispatcher.pollTaskStatusUntilSuccess(taskId, true);
     const [[downloadBuffer], content, title] = await this.taskDispatcher.downloadTaskResults(taskId);
-    
+
     const outputPath = join(process.cwd(), `task-${taskId}.mp4`);
     writeFileSync(outputPath, downloadBuffer);
     console.log(`💾 Downloaded buffer saved to ${outputPath}`);
@@ -69,11 +69,11 @@ export class SchedulerManager {
     }
     const editor = new EditVideoDetails(vid)
     let alreadyHaveTitle = await editor.checkVideoAlreadyHaveTitle(title)
-    console.log({alreadyHaveTitle})
+    console.log({ alreadyHaveTitle })
     await editor.makeChanges(title, '')
     await editor.clickButtonSave(await editor.connect.getFirstPage())
     alreadyHaveTitle = await editor.checkVideoAlreadyHaveTitle(title)
-    console.log({alreadyHaveTitle})
+    console.log({ alreadyHaveTitle })
 
     this.shutdownScheduler(0);
   }
