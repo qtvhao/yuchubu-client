@@ -46,13 +46,15 @@ export class SchedulerManager {
   }
 
   private async handleDispatchSuccess(taskId: string): Promise<void> {
-    console.log('Dispatch succeeded.');
+    console.log('✅ Đã phân tích thành công. Generating prompt-to-video cho video mới.');
+    console.log('🚀 Dispatch succeeded.');
     await this.taskDispatcher.pollTaskStatusUntilSuccess(taskId, true);
-    const [downloadBuffer] = await this.taskDispatcher.downloadTaskResults(taskId);
+    const [[downloadBuffer], content] = await this.taskDispatcher.downloadTaskResults(taskId);
     
     const outputPath = join(process.cwd(), `task-${taskId}.mp4`);
     writeFileSync(outputPath, downloadBuffer);
-    console.log(`Downloaded buffer saved to ${outputPath}`);
+    console.log(`💾 Downloaded buffer saved to ${outputPath}`);
+    console.log(`Content: ${content}`)
 
     this.shutdownScheduler(0);
   }

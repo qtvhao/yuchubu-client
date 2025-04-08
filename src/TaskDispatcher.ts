@@ -4,6 +4,7 @@ import { Utility } from './Utility.js';
 import dotenv from 'dotenv'
 
 dotenv.config()
+const DEFAULT_CURRENT_STEP = "📊 Đang phân tích Channel Analytics"
 const ACCOUNT_ID = Number(process.env.ACCOUNT_ID);
 if (isNaN(ACCOUNT_ID)) {
   throw new Error(`Invalid ACCOUNT_ID environment variable: ${process.env.ACCOUNT_ID}`);
@@ -37,16 +38,14 @@ class Config {
 export class TaskDispatcher {
   async dispatchTaskWithRetry(): Promise<string | null> {
     for (let attempt = 1; attempt <= Config.MAX_RETRIES; attempt++) {
-      const attemptProfiler = new Profiler(`Attempt ${attempt}`);
       const result = await this.dispatchTask();
-      attemptProfiler.end();
 
       if (!isDispatchErrorResponse(result)) {
         return result.taskId;
       }
 
       if (attempt < Config.MAX_RETRIES) {
-        console.log(`Retrying (${attempt}/${Config.MAX_RETRIES}) in ${Config.RETRY_DELAY_MS / 1000} seconds...`);
+        console.log(`${DEFAULT_CURRENT_STEP}. Retrying (${attempt}/${Config.MAX_RETRIES}) in ${Config.RETRY_DELAY_MS / 1000} seconds...`);
         await Utility.delay(Config.RETRY_DELAY_MS);
       }
     }
@@ -58,7 +57,6 @@ export class TaskDispatcher {
   private async dispatchTask(): Promise<DispatchSuccessResponse | DispatchErrorResponse> {
     const accountId = ACCOUNT_ID;
 
-    const dispatchProfiler = new Profiler('Dispatch request');
     const response: AxiosResponse<DispatchSuccessResponse | DispatchErrorResponse> = await axios.post(
       `${Config.BASE_URL}/task/dispatch`, {
       accountId
@@ -69,7 +67,6 @@ export class TaskDispatcher {
         }
       }
     );
-    dispatchProfiler.end();
 
     return response.data;
   }
@@ -92,11 +89,17 @@ export class TaskDispatcher {
         }
       }
     );
+    const currentStep = progressResponse.data?.currentStep
     const progressBar = progressResponse.data?.progressBar
     const percent = progressResponse.data?.progress;
-    const progressWithPercent = percent != null ? `${progressBar} ${percent}%` : progressBar;
-    process.stdout.write('\x1b[2K\r'); // Clear the line
-    process.stdout.write(progressWithPercent + '\r');
+    if (currentStep) {
+      console.log("" + currentStep)
+    }
+    if (percent != null) {
+      const progressWithPercent = `${progressBar} ${percent}%`;
+      process.stdout.write('\x1b[2K\r'); // Clear the line
+      process.stdout.write(progressWithPercent + '\r');
+    }
 
     if (response.status === 404) {
       console.warn(`Task ${taskId} not found (404). Retrying...`);
@@ -114,8 +117,8 @@ export class TaskDispatcher {
   }
 
   async pollTaskStatusUntilSuccess(taskId: string, debug: boolean = false): Promise<'success' | 'timeout'> {
-    const MAX_POLLING_DURATION_MS = 15 * 60 * 1000; // 15 minutes
-    const POLL_INTERVAL_MS = 2000; // Poll every 2 seconds
+    const MAX_POLLING_DURATION_MS = 30 * 60 * 1000;
+    const POLL_INTERVAL_MS = 20_000;
     const startTime = Date.now();
 
     if (debug) {
@@ -157,13 +160,17 @@ export class TaskDispatcher {
     return Buffer.from(response.data);
   }
 
-  async downloadTaskResults(taskId: string): Promise<Buffer[]> {
+  async downloadTaskResults(taskId: string): Promise<[Buffer[], string]> {
     const response = await axios.get(`${Config.BASE_URL}/tasks/completed/${taskId}`, {
       validateStatus: function (status) {
         return status === 200;
       }
     });
 
+    const markdown_text_clips = response.data.markdown_text
+    const markdown_text = markdown_text_clips.map((clip: any) => {
+      return clip.original
+    }).join("\n\n")
     const downloads = response.data?.downloads;
     if (!Array.isArray(downloads) || downloads.length === 0) {
       throw new Error(`No downloads found for task ${taskId}`);
@@ -182,6 +189,6 @@ export class TaskDispatcher {
       buffers.push(Buffer.from(fileResponse.data));
     }
 
-    return buffers;
+    return [buffers, markdown_text];
   }
 }
