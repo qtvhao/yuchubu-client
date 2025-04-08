@@ -40,6 +40,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@puppeteer/browsers@npm:2.9.0":
+  version: 2.9.0
+  resolution: "@puppeteer/browsers@npm:2.9.0"
+  dependencies:
+    debug: ^4.4.0
+    extract-zip: ^2.0.1
+    progress: ^2.0.3
+    proxy-agent: ^6.5.0
+    semver: ^7.7.1
+    tar-fs: ^3.0.8
+    yargs: ^17.7.2
+  bin:
+    browsers: lib/cjs/main-cli.js
+  checksum: bd3f51e73de9056d3a8b4928d37f1a3d1dd2d6b2518b96809d60321331ae56b54b8668372a0e53c277cfb452e27fdbaf9ded394b90a92ded5033c53883cbf204
+  languageName: node
+  linkType: hard
+
 "@tootallnate/quickjs-emscripten@npm:^0.23.0":
   version: 0.23.0
   resolution: "@tootallnate/quickjs-emscripten@npm:0.23.0"
@@ -55,11 +72,11 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:*":
-  version: 22.13.13
-  resolution: "@types/node@npm:22.13.13"
+  version: 22.14.0
+  resolution: "@types/node@npm:22.14.0"
   dependencies:
-    undici-types: ~6.20.0
-  checksum: 763c120725c4817227d3043095fd1e764744b2f3632e3e3c8242e1620a8e6fe1c9eeae38074dee3e39af6b890de142c3b6067f9b31e36635c44f3f5f4f2bb8cf
+    undici-types: ~6.21.0
+  checksum: 8bfae1d3c428b122d23750690bdc5b8295a53949823563ec60654a24ece98bde4fc0d2b5f06ddc6def6f01a08dfe62cece7c93e60964b74f736145dad5ee1302
   languageName: node
   linkType: hard
 
@@ -126,8 +143,8 @@ __metadata:
   linkType: hard
 
 "bare-fs@npm:^4.0.1":
-  version: 4.0.2
-  resolution: "bare-fs@npm:4.0.2"
+  version: 4.1.2
+  resolution: "bare-fs@npm:4.1.2"
   dependencies:
     bare-events: ^2.5.4
     bare-path: ^3.0.0
@@ -137,7 +154,7 @@ __metadata:
   peerDependenciesMeta:
     bare-buffer:
       optional: true
-  checksum: 3e6346c374dfd62ee5514baf990154b176cf9db84e17bf89a51f1985274ad1a3bb2e4894f1a736e231ec635fe25c97449fb570f3e8d56b74c18cef190ea83ef3
+  checksum: f4b3e9b0a07cb5ab5904c8644cf8945b271707e69bac29e817dfd1f7624583f3c91c1502d2ea1650919fea20425fcf6823b413087cbd8fa158e480b3db60ab87
   languageName: node
   linkType: hard
 
@@ -207,6 +224,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chromium-bidi@npm:3.0.0":
+  version: 3.0.0
+  resolution: "chromium-bidi@npm:3.0.0"
+  dependencies:
+    mitt: ^3.0.1
+    zod: ^3.24.1
+  peerDependencies:
+    devtools-protocol: "*"
+  checksum: 3a20b551fdcb95e4ac13dbfd38a8d468933a560e2985ca95daf2f6e80deefa72ae54c512a0039f148819418127a55a158f1ebd8ef06367ad0c67e2b10616299b
+  languageName: node
+  linkType: hard
+
 "cliui@npm:^8.0.1":
   version: 8.0.1
   resolution: "cliui@npm:8.0.1"
@@ -231,6 +260,15 @@ __metadata:
   version: 1.1.4
   resolution: "color-name@npm:1.1.4"
   checksum: b0445859521eb4021cd0fb0cc1a75cecf67fceecae89b63f62b201cca8d345baf8b952c966862a9d9a2632987d4f6581f0ec8d957dfacece86f0a7919316f610
+  languageName: node
+  linkType: hard
+
+"contentdroplet@github:qtvhao/ContentDroplet":
+  version: 1.0.0
+  resolution: "contentdroplet@https://github.com/qtvhao/ContentDroplet.git#commit=d556b5317436d0ffca2145bd33340872000dc538"
+  dependencies:
+    puppeteerconnect.ts: "github:qtvhao/PuppeteerConnect.ts"
+  checksum: 75831250a9859e07afcab55bd752d2bcfe808fbae8af2b7f27a73aac5cb698423ff8a94d052828aa7a5f18d44395bbd0d36cf678c314e56d4e98712338a82654
   languageName: node
   linkType: hard
 
@@ -285,6 +323,13 @@ __metadata:
   version: 0.0.1413902
   resolution: "devtools-protocol@npm:0.0.1413902"
   checksum: 55d79bfd2d656cbe7f7aa098c018003974ed8744da68db78025b0eb2238654105e077cc86ca21ccc1e8e01ad114e02f8dbfd0efe98f696ccda5fa01eb44e131b
+  languageName: node
+  linkType: hard
+
+"devtools-protocol@npm:0.0.1425554":
+  version: 0.0.1425554
+  resolution: "devtools-protocol@npm:0.0.1425554"
+  checksum: 8ad301abee2146f0aff613c81c01570d787a0a01fc764fc8fbe0bdbac379d2f426d69fe0e38fbbb1342032f9e063910ec1d807d18e40af29a85eda88bfefc763
   languageName: node
   linkType: hard
 
@@ -699,7 +744,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer@npm:^24.4.0":
+"puppeteer-core@npm:24.6.0":
+  version: 24.6.0
+  resolution: "puppeteer-core@npm:24.6.0"
+  dependencies:
+    "@puppeteer/browsers": 2.9.0
+    chromium-bidi: 3.0.0
+    debug: ^4.4.0
+    devtools-protocol: 0.0.1425554
+    typed-query-selector: ^2.12.0
+    ws: ^8.18.1
+  checksum: e517133ea9650469727d9af0ae167a42400bb4c7ecae685b20937d37febc6cbd5f76edf5616246561c5a86322abef6386f36e4b2fae3586a6d3b8248ccb542c5
+  languageName: node
+  linkType: hard
+
+"puppeteer@npm:24.4.0":
   version: 24.4.0
   resolution: "puppeteer@npm:24.4.0"
   dependencies:
@@ -712,6 +771,31 @@ __metadata:
   bin:
     puppeteer: lib/cjs/puppeteer/node/cli.js
   checksum: df14c1442c9167592a1a93bd2086bc7a37f74068012e4d6f128a10debbafb24cdb63d05ce921427ba60a4985f21f5161bdebfa58b234263384ebc8e7a4feb241
+  languageName: node
+  linkType: hard
+
+"puppeteer@npm:^24.4.0":
+  version: 24.6.0
+  resolution: "puppeteer@npm:24.6.0"
+  dependencies:
+    "@puppeteer/browsers": 2.9.0
+    chromium-bidi: 3.0.0
+    cosmiconfig: ^9.0.0
+    devtools-protocol: 0.0.1425554
+    puppeteer-core: 24.6.0
+    typed-query-selector: ^2.12.0
+  bin:
+    puppeteer: lib/cjs/puppeteer/node/cli.js
+  checksum: 3cf6efb500fc9ab7d8acb1efb2a9e1b7bb1db0bf82243c0791f876b206328b28a15afacfde8ed4122507b17ba135c57c2daf29fb833dd13d3ddf23e578293083
+  languageName: node
+  linkType: hard
+
+"puppeteerconnect.ts@github:qtvhao/PuppeteerConnect.ts":
+  version: 1.0.0
+  resolution: "puppeteerconnect.ts@https://github.com/qtvhao/PuppeteerConnect.ts.git#commit=c699fc93fedd1b5ae24b6a6472385c12b69d07f7"
+  dependencies:
+    puppeteer: 24.4.0
+  checksum: 1068259cb31f77e49168e0692a7bbd3133f72b2f2250e5997e04671591ddf09d6c784180920b24576f7d168a6dba2d719361feaf532980fea8c25d5a4dbbea74
   languageName: node
   linkType: hard
 
@@ -865,10 +949,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~6.20.0":
-  version: 6.20.0
-  resolution: "undici-types@npm:6.20.0"
-  checksum: b7bc50f012dc6afbcce56c9fd62d7e86b20a62ff21f12b7b5cbf1973b9578d90f22a9c7fe50e638e96905d33893bf2f9f16d98929c4673c2480de05c6c96ea8b
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 46331c7d6016bf85b3e8f20c159d62f5ae471aba1eb3dc52fff35a0259d58dcc7d592d4cc4f00c5f9243fa738a11cfa48bd20203040d4a9e6bc25e807fab7ab3
   languageName: node
   linkType: hard
 
@@ -967,6 +1051,7 @@ __metadata:
   resolution: "yuchubu-client@workspace:."
   dependencies:
     "@types/node-cron": ^3.0.11
+    contentdroplet: "github:qtvhao/ContentDroplet"
     dotenv: ^16.4.7
     marked: ^15.0.8
     node-cron: ^3.0.3

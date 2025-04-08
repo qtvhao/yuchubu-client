@@ -162,7 +162,7 @@ export class TaskDispatcher {
     return Buffer.from(response.data);
   }
 
-  async downloadTaskResults(taskId: string): Promise<[Buffer[], string]> {
+  async downloadTaskResults(taskId: string): Promise<[Buffer[], string, string]> {
     const response = await axios.get(`${Config.BASE_URL}/tasks/completed/${taskId}`, {
       validateStatus: function (status) {
         return status === 200;
@@ -172,7 +172,7 @@ export class TaskDispatcher {
     const tokens: TokensList = response.data?.tokens
     const strongTokens = TokenUtils.findTokensOfType(tokens, 'strong')
       .sort((a, b) => (b.text?.length || 0) - (a.text?.length || 0));
-    console.log(strongTokens);
+    const longestTitle = (strongTokens[0].text);
     const content = response.data?.content;
     const downloads = response.data?.downloads;
     if (!Array.isArray(downloads) || downloads.length === 0) {
@@ -192,6 +192,6 @@ export class TaskDispatcher {
       buffers.push(Buffer.from(fileResponse.data));
     }
 
-    return [buffers, content];
+    return [buffers, content, longestTitle];
   }
 }

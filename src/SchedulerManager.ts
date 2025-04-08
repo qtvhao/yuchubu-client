@@ -3,6 +3,7 @@ import { SyncChannelAnalyticsScheduler } from './schedulers/SyncChannelAnalytics
 import { TaskDispatcher } from './TaskDispatcher.js';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
+import { YouTubeUploader, SaveVideo, EditVideoDetails } from 'contentdroplet'
 
 // === Scheduler Setup ===
 
@@ -49,12 +50,26 @@ export class SchedulerManager {
     console.log('✅ Đã phân tích thành công. Generating prompt-to-video cho video mới.');
     console.log('🚀 Dispatch succeeded.');
     await this.taskDispatcher.pollTaskStatusUntilSuccess(taskId, true);
-    const [[downloadBuffer], content] = await this.taskDispatcher.downloadTaskResults(taskId);
+    const [[downloadBuffer], content, title] = await this.taskDispatcher.downloadTaskResults(taskId);
     
     const outputPath = join(process.cwd(), `task-${taskId}.mp4`);
     writeFileSync(outputPath, downloadBuffer);
     console.log(`💾 Downloaded buffer saved to ${outputPath}`);
     console.log(`Content: ${content}`)
+    // 
+    const uploader = new YouTubeUploader()
+    const uploaded = await uploader.uploadVideo(outputPath)
+    if (typeof uploaded === 'undefined') {
+      throw new Error('Video upload failed: no response returned from YouTubeUploader.');
+    }
+    const saveVideo = new SaveVideo(uploaded, 'Private')
+    const vid = await saveVideo.run()
+    if (typeof vid === 'undefined' || vid === null) {
+      throw new Error('SaveVideo failed: received null or undefined video object.');
+    }
+    const editor = new EditVideoDetails(vid)
+    await editor.makeChanges(title, '')
+    await editor.clickButtonSave(await editor.connect.getFirstPage())
 
     this.shutdownScheduler(0);
   }
