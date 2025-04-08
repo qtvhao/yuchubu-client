@@ -536,6 +536,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"marked@npm:^15.0.8":
+  version: 15.0.8
+  resolution: "marked@npm:15.0.8"
+  bin:
+    marked: bin/marked.js
+  checksum: bff31687adc4ec11efda00acc383cca157d0f41383c8925a9057e5ee6910ab41e643bae8b06fc283ff73de0d04790b4460df65ca19c004c6de0622e1f7970cb6
+  languageName: node
+  linkType: hard
+
 "mitt@npm:^3.0.1":
   version: 3.0.1
   resolution: "mitt@npm:3.0.1"
@@ -959,6 +968,7 @@ __metadata:
   dependencies:
     "@types/node-cron": ^3.0.11
     dotenv: ^16.4.7
+    marked: ^15.0.8
     node-cron: ^3.0.3
     ystudio-analytics-agent: "github:qtvhao/ystudio-analytics-agent#180e8d5dc4bc216ecc508912955f7b64c8f4f42d"
   languageName: unknown

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.7",
+    "marked": "^15.0.8",
     "node-cron": "^3.0.3",
     "ystudio-analytics-agent": "github:qtvhao/ystudio-analytics-agent#180e8d5dc4bc216ecc508912955f7b64c8f4f42d"
   },

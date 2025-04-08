@@ -2,6 +2,8 @@ import axios, { AxiosResponse } from 'axios';
 import { Profiler } from './Profiler.js';
 import { Utility } from './Utility.js';
 import dotenv from 'dotenv'
+import { TokensList } from 'marked';
+import { TokenUtils } from './TokenUtils.js';
 
 dotenv.config()
 const DEFAULT_CURRENT_STEP = "📊 Đang phân tích Channel Analytics"
@@ -167,10 +169,11 @@ export class TaskDispatcher {
       }
     });
 
-    const markdown_text_clips = response.data.markdown_text
-    const markdown_text = markdown_text_clips.map((clip: any) => {
-      return clip.original
-    }).join("\n\n")
+    const tokens: TokensList = response.data?.tokens
+    const strongTokens = TokenUtils.findTokensOfType(tokens, 'strong')
+      .sort((a, b) => (b.text?.length || 0) - (a.text?.length || 0));
+    console.log(strongTokens);
+    const content = response.data?.content;
     const downloads = response.data?.downloads;
     if (!Array.isArray(downloads) || downloads.length === 0) {
       throw new Error(`No downloads found for task ${taskId}`);
@@ -189,6 +192,6 @@ export class TaskDispatcher {
       buffers.push(Buffer.from(fileResponse.data));
     }
 
-    return [buffers, markdown_text];
+    return [buffers, content];
   }
 }
