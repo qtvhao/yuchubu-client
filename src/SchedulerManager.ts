@@ -68,8 +68,12 @@ export class SchedulerManager {
       throw new Error('SaveVideo failed: received null or undefined video object.');
     }
     const editor = new EditVideoDetails(vid)
+    let alreadyHaveTitle = await editor.checkVideoAlreadyHaveTitle(title)
+    console.log({alreadyHaveTitle})
     await editor.makeChanges(title, '')
     await editor.clickButtonSave(await editor.connect.getFirstPage())
+    alreadyHaveTitle = await editor.checkVideoAlreadyHaveTitle(title)
+    console.log({alreadyHaveTitle})
 
     this.shutdownScheduler(0);
   }
