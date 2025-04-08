@@ -105,12 +105,18 @@ export class SyncChannelAnalyticsScheduler {
 
     try {
       const impressions0 = await this.studio.fetchAndSaveWatchTimeByContentPage();
+      const firstFiveImpressions0 = impressions0.slice(0, 5);
       console.log(`[${new Date().toISOString()}] Fetched ${impressions0} watch time data.`);
+      
+      const subscribers = await this.studio.fetchAndSaveSubscribersByContentPage();
+      const firstFiveSubscribers = subscribers.slice(0, 5);
+      console.log(`[${new Date().toISOString()}] Fetched ${subscribers.length} subscriber data.`);
 
-      const impressions = await this.studio.fetchAndSaveImpressionsByContentPage();
+      const allImpressions = await this.studio.fetchAndSaveImpressionsByContentPage();
+      const impressions = allImpressions.slice(0, 5);
       console.log(`[${new Date().toISOString()}] Fetched ${impressions.length} impressions.`);
       
-      const concatImpressions = impressions0.concat(impressions).sort(() => Math.random() - 0.5);
+      const concatImpressions = firstFiveImpressions0.concat(impressions, firstFiveSubscribers).sort(() => Math.random() - 0.5);
 
       await this.publisher.publish({
         timestamp: new Date().toISOString(),

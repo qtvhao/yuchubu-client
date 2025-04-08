@@ -1039,10 +1039,10 @@ __metadata:
 
 "ystudio-analytics-agent@github:qtvhao/ystudio-analytics-agent":
   version: 1.0.0
-  resolution: "ystudio-analytics-agent@https://github.com/qtvhao/ystudio-analytics-agent.git#commit=a0789f2262f622b4499277c4d7fa701ebdf00e3c"
+  resolution: "ystudio-analytics-agent@https://github.com/qtvhao/ystudio-analytics-agent.git#commit=ea838f4d0ca5281570c8e970b93252859294bbfe"
   dependencies:
     puppeteer: ^24.4.0
-  checksum: d9bc54a77bf4a412dda8469950ca8033e8af6441eb520978ea4fa723572e915c5fd21f5e8946f3e020dcbd1ae0f939149659524c447dff70a991a263f63c5009
+  checksum: b3135475ea3e435d3af3235c125cd569cad60d952d7d784bba3c8fb9bab787f8e3aced87158b504aed0fd616639c27504a20e94328679f5ea5f6f7e2e6663756
   languageName: node
   linkType: hard
 
