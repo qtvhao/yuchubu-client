@@ -104,13 +104,18 @@ export class SyncChannelAnalyticsScheduler {
     }
 
     try {
+      const impressions0 = await this.studio.fetchAndSaveWatchTimeByContentPage();
+      console.log(`[${new Date().toISOString()}] Fetched ${impressions0} watch time data.`);
+
       const impressions = await this.studio.fetchAndSaveImpressionsByContentPage();
       console.log(`[${new Date().toISOString()}] Fetched ${impressions.length} impressions.`);
+      
+      const concatImpressions = impressions0.concat(impressions).sort(() => Math.random() - 0.5);
 
       await this.publisher.publish({
         timestamp: new Date().toISOString(),
         status: 'success',
-        impressions: impressions.slice(0, 1),
+        impressions: concatImpressions,
         accountId: ACCOUNT_ID,
       });
 
