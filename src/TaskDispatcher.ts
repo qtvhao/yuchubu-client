@@ -171,7 +171,16 @@ export class TaskDispatcher {
 
     const tokens: TokensList = response.data?.tokens
     const strongTokens = TokenUtils.findTokensOfType(tokens, 'strong')
-      .sort((a, b) => (b.text?.length || 0) - (a.text?.length || 0));
+    
+    if (!strongTokens || strongTokens.length === 0) {
+      console.error("No strong tokens found. Context data:", {
+        tokens,
+        content: response.data?.content,
+        downloads: response.data?.downloads
+      });
+      throw new Error(`No strong tokens found for task ${taskId}`);
+    }
+    
     const longestTitle = (strongTokens[0].text);
     const content = response.data?.content;
     const downloads = response.data?.downloads;
