@@ -4,8 +4,20 @@ import { Utility } from './Utility.js';
 import dotenv from 'dotenv'
 import { TokensList } from 'marked';
 import { TokenUtils } from './TokenUtils.js';
+import { createLogger, transports, format } from 'winston';
 
 dotenv.config()
+const logger = createLogger({
+  level: 'info',
+  format: format.combine(
+    format.label({ label: '[TaskDispatcher]' }),
+    format.timestamp(),
+    format.json()
+  ),
+  transports: [
+    new transports.Console(),
+  ],
+});
 const DEFAULT_CURRENT_STEP = "📊 Đang phân tích Channel Analytics"
 const ACCOUNT_ID = Number(process.env.ACCOUNT_ID);
 if (isNaN(ACCOUNT_ID)) {
@@ -38,6 +50,85 @@ class Config {
 // === Task Dispatching Logic ===
 
 export class TaskDispatcher {
+  private async logTaskProgress(taskId: string): Promise<void> {
+    const progressResponse: AxiosResponse = await axios.get(
+      `${Config.BASE_URL}/tasks/progress/${taskId}`,
+      {
+        validateStatus: function (status) {
+          return status === 200 || status === 404;
+        }
+      }
+    );
+
+    const currentStep = progressResponse.data?.currentStep;
+    const progressBar = progressResponse.data?.progressBar;
+    const percent = progressResponse.data?.progress;
+
+    if (currentStep) {
+      logger.info("" + currentStep);
+    }
+    if (percent && percent > 0) {
+      const progressWithPercent = `${progressBar} ${percent}%`;
+      logger.info(progressWithPercent);
+    }
+  }
+
+  private async getTaskCompletionStatus(taskId: string): Promise<AxiosResponse> {
+    const MAX_ATTEMPTS = 5;
+    const RETRY_DELAY_MS = 30_000; // 30 seconds
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        const response = await axios.get(
+          `${Config.BASE_URL}/tasks/completed/${taskId}`,
+          {
+            validateStatus: function (status) {
+              return status === 200 || status === 404 || (status >= 500 && status < 600);
+            }
+          }
+        );
+
+        if (response.status >= 500 && response.status < 600) {
+          logger.warn(`Attempt ${attempt}/${MAX_ATTEMPTS} - Server error (${response.status}). Retrying in ${RETRY_DELAY_MS / 1000} seconds...`);
+          if (attempt < MAX_ATTEMPTS) {
+            await Utility.delay(RETRY_DELAY_MS);
+            continue;
+          }
+        }
+
+        return response;
+      } catch (error) {
+        logger.error(`Attempt ${attempt}/${MAX_ATTEMPTS} - Error fetching task completion status: ${error}`);
+        if (attempt < MAX_ATTEMPTS) {
+          await Utility.delay(RETRY_DELAY_MS);
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    throw new Error(`Failed to get task completion status after ${MAX_ATTEMPTS} attempts.`);
+  }
+
+  async checkTaskStatus(taskId: string): Promise<'success' | 'retry'> {
+    await this.logTaskProgress(taskId);
+    const response = await this.getTaskCompletionStatus(taskId);
+
+    if (response.status === 404) {
+      logger.warn(`Task ${taskId} not found (404). Retrying...`);
+      return 'retry';
+    }
+
+    const downloads = response.data?.downloads;
+    if (Array.isArray(downloads) && downloads.length > 0) {
+      logger.info(`Task ${taskId} completed successfully.`, { downloads });
+      return 'success';
+    }
+
+    logger.warn(`Task ${taskId} status indicates retry needed.`);
+    return 'retry';
+  }
+
   async dispatchTaskWithRetry(): Promise<string | null> {
     for (let attempt = 1; attempt <= Config.MAX_RETRIES; attempt++) {
       const result = await this.dispatchTask();
@@ -47,12 +138,12 @@ export class TaskDispatcher {
       }
 
       if (attempt < Config.MAX_RETRIES) {
-        console.log(`${DEFAULT_CURRENT_STEP}. Retrying (${attempt}/${Config.MAX_RETRIES}) in ${Config.RETRY_DELAY_MS / 1000} seconds...`);
+        logger.info(`${DEFAULT_CURRENT_STEP}. Retrying (${attempt}/${Config.MAX_RETRIES}) in ${Config.RETRY_DELAY_MS / 1000} seconds...`);
         await Utility.delay(Config.RETRY_DELAY_MS);
       }
     }
 
-    console.error('Max retries reached.');
+    logger.error('Max retries reached.');
     return null;
   }
 
@@ -73,70 +164,24 @@ export class TaskDispatcher {
     return response.data;
   }
 
-  async checkTaskStatus(taskId: string): Promise<'success' | 'retry'> {
-    const response: AxiosResponse = await axios.get(
-      `${Config.BASE_URL}/tasks/completed/${taskId}`,
-      {
-        validateStatus: function (status) {
-          return status === 200 || status === 404;
-        }
-      }
-    );
-
-    const progressResponse: AxiosResponse = await axios.get(
-      `${Config.BASE_URL}/tasks/progress/${taskId}`,
-      {
-        validateStatus: function (status) {
-          return status === 200 || status === 404;
-        }
-      }
-    );
-    const currentStep = progressResponse.data?.currentStep
-    const progressBar = progressResponse.data?.progressBar
-    const percent = progressResponse.data?.progress;
-    if (currentStep) {
-      console.log("" + currentStep)
-    }
-    if (percent && percent > 0) {
-      const progressWithPercent = `${progressBar} ${percent}%`;
-      console.log(progressWithPercent)
-      // process.stdout.write('\x1b[2K\r'); // Clear the line
-      process.stdout.write(progressWithPercent + '\r');
-    }
-
-    if (response.status === 404) {
-      console.warn(`Task ${taskId} not found (404). Retrying...`);
-      return 'retry';
-    }
-
-    const downloads = response.data?.downloads;
-    if (Array.isArray(downloads) && downloads.length > 0) {
-      console.log(`Task ${taskId} completed successfully. Downloads:`, downloads);
-      return 'success';
-    }
-
-    console.warn(`Task ${taskId} status indicates retry needed.`);
-    return 'retry';
-  }
-
   async pollTaskStatusUntilSuccess(taskId: string, debug: boolean = false): Promise<'success' | 'timeout'> {
-    const MAX_POLLING_DURATION_MS = 30 * 60 * 1000;
+    const MAX_POLLING_DURATION_MS = 60 * 60 * 1000;
     const POLL_INTERVAL_MS = 20_000;
     const startTime = Date.now();
 
     if (debug) {
-      console.debug(`Starting polling for task ${taskId}`);
+      logger.debug(`Starting polling for task ${taskId}`);
     }
 
     while (Date.now() - startTime < MAX_POLLING_DURATION_MS) {
       const status = await this.checkTaskStatus(taskId);
       if (debug) {
-        console.debug(`Polled status: ${status} at ${new Date().toISOString()}`);
+        // logger.debug(`Polled status: ${status} at ${new Date().toISOString()}`);
       }
 
       if (status === 'success') {
         if (debug) {
-          console.debug(`Polling ended with success for task ${taskId}`);
+          logger.debug(`Polling ended with success for task ${taskId}`);
         }
         return 'success';
       }
@@ -144,9 +189,9 @@ export class TaskDispatcher {
       await Utility.delay(POLL_INTERVAL_MS);
     }
 
-    console.warn(`Polling timed out after ${MAX_POLLING_DURATION_MS / 1000} seconds.`);
+    logger.warn(`Polling timed out after ${MAX_POLLING_DURATION_MS / 1000} seconds.`);
     if (debug) {
-      console.debug(`Polling ended with timeout for task ${taskId}`);
+      logger.debug(`Polling ended with timeout for task ${taskId}`);
     }
     return 'timeout';
   }
@@ -174,7 +219,7 @@ export class TaskDispatcher {
     const strongTokens = TokenUtils.findTokensOfType(tokens, 'strong')
     
     if (!strongTokens || strongTokens.length === 0) {
-      console.error("No strong tokens found. Context data:", {
+      logger.error("No strong tokens found.", {
         tokens,
         content: response.data?.content,
         downloads: response.data?.downloads
