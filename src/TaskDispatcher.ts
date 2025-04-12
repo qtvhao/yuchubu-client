@@ -97,7 +97,7 @@ export class TaskDispatcher {
     if (currentStep) {
       console.log("" + currentStep)
     }
-    if (progressBar != null) {
+    if (percent && percent > 0) {
       const progressWithPercent = `${progressBar} ${percent}%`;
       console.log(progressWithPercent)
       // process.stdout.write('\x1b[2K\r'); // Clear the line

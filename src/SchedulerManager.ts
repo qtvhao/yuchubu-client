@@ -43,7 +43,7 @@ export class SchedulerManager {
 
   private startTotalDispatchProfiler(): Profiler {
     console.log('syncSuccess');
-    return new Profiler('Total dispatch process');
+    return new Profiler('Total Dispatch Process');
   }
 
   private async handleDispatchSuccess(taskId: string): Promise<void> {
@@ -58,7 +58,7 @@ export class SchedulerManager {
     console.log(`Content: ${content}`)
     await new Promise(r=>setTimeout(r, 2e3))
     // 
-    const manager = new YouTubeVideoManager(outputPath, title)
+    const manager = new YouTubeVideoManager(outputPath, title.charAt(0).toUpperCase() + title.slice(1))
     await manager.run()
 
     this.shutdownScheduler(0);

@@ -265,10 +265,10 @@ __metadata:
 
 "contentdroplet@github:qtvhao/ContentDroplet":
   version: 1.0.0
-  resolution: "contentdroplet@https://github.com/qtvhao/ContentDroplet.git#commit=fe8a86b76c1f047bbfc371b309b476bb25eaa86b"
+  resolution: "contentdroplet@https://github.com/qtvhao/ContentDroplet.git#commit=5e14d3b09f12056999cc2c37a2bbc9c1b8e93b10"
   dependencies:
     puppeteerconnect.ts: "github:qtvhao/PuppeteerConnect.ts"
-  checksum: ba44e12aa53c1d9e0e95ca78f981ecb5eb5898b0a6bc8f7f808289d52aeb12d5d9dba9942152b8886c287512c02656551873dc8a884443a7d02a431852944cbe
+  checksum: e1c1e3f3b479fea29d8ba576a0cb6c82a7a9bb92320c3d59e0351209eb048939a3e4485c3048b0e628d026983f06bca5bed90cc420f1802fda7c8c10023917aa
   languageName: node
   linkType: hard
 
