@@ -1,6 +1,7 @@
 import cron, { ScheduledTask } from 'node-cron';
 import { YoutubeStudio } from 'ystudio-analytics-agent/dist/YoutubeStudio.js';
 import { PublisherService } from '../utils/PublisherService.js';
+import { PuppeteerConnect } from 'puppeteerconnect.ts/dist/PuppeteerConnect.js'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -105,15 +106,15 @@ export class SyncChannelAnalyticsScheduler {
 
     try {
       const impressions0 = await this.studio.fetchAndSaveWatchTimeByContentPage();
-      const firstFiveImpressions0 = impressions0.slice(0, 5);
+      const firstFiveImpressions0 = impressions0.slice(0, 2);
       console.log(`[${new Date().toISOString()}] Fetched ${impressions0} watch time data.`);
       
       const subscribers = await this.studio.fetchAndSaveSubscribersByContentPage();
-      const firstFiveSubscribers = subscribers.slice(0, 5);
+      const firstFiveSubscribers = subscribers.slice(0, 2);
       console.log(`[${new Date().toISOString()}] Fetched ${subscribers.length} subscriber data.`);
 
       const allImpressions = await this.studio.fetchAndSaveImpressionsByContentPage();
-      const impressions = allImpressions.slice(0, 5);
+      const impressions = allImpressions.slice(0, 2);
       console.log(`[${new Date().toISOString()}] Fetched ${impressions.length} impressions.`);
       
       const concatImpressions = firstFiveImpressions0.concat(impressions, firstFiveSubscribers).sort(() => Math.random() - 0.5);
@@ -128,6 +129,7 @@ export class SyncChannelAnalyticsScheduler {
       console.log(`[${new Date().toISOString()}] Sync completed successfully.`);
 
       this.emit('syncSuccess', { impressions });
+      await PuppeteerConnect.killAllChromeProcesses()
     } catch (error: any) {
       console.error(`[${new Date().toISOString()}] Sync failed:`, error.message);
 

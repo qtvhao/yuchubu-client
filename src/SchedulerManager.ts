@@ -3,7 +3,7 @@ import { SyncChannelAnalyticsScheduler } from './schedulers/SyncChannelAnalytics
 import { TaskDispatcher } from './TaskDispatcher.js';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
-import { YouTubeUploader, SaveVideo, EditVideoDetails } from 'contentdroplet'
+import { YouTubeVideoManager } from 'contentdroplet/dist/YouTubeVideoManager.js'
 
 // === Scheduler Setup ===
 
@@ -56,26 +56,10 @@ export class SchedulerManager {
     writeFileSync(outputPath, downloadBuffer);
     console.log(`💾 Downloaded buffer saved to ${outputPath}`);
     console.log(`Content: ${content}`)
+    await new Promise(r=>setTimeout(r, 2e3))
     // 
-    const uploader = new YouTubeUploader()
-    const uploaded = await uploader.uploadVideo(outputPath)
-    if (typeof uploaded === 'undefined') {
-      throw new Error('Video upload failed: no response returned from YouTubeUploader.');
-    }
-    const saveVideo = new SaveVideo(uploaded, 'Private')
-    const vid = await saveVideo.run()
-    if (typeof vid === 'undefined' || vid === null) {
-      throw new Error('SaveVideo failed: received null or undefined video object.');
-    }
-    const editor = new EditVideoDetails(vid)
-    await editor.connect.connectLocalBrowser();
-    let alreadyHaveTitle = await editor.checkVideoAlreadyHaveTitle(title)
-    console.log({ alreadyHaveTitle })
-    await editor.makeChanges(title, '')
-    await editor.clickButtonSave(await editor.connect.getFirstPage())
-    await editor.connect.connectLocalBrowser();
-    alreadyHaveTitle = await editor.checkVideoAlreadyHaveTitle(title)
-    console.log({ alreadyHaveTitle })
+    const manager = new YouTubeVideoManager(outputPath, title)
+    await manager.run()
 
     this.shutdownScheduler(0);
   }

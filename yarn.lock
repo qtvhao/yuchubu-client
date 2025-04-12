@@ -23,6 +23,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@puppeteer/browsers@npm:2.10.0":
+  version: 2.10.0
+  resolution: "@puppeteer/browsers@npm:2.10.0"
+  dependencies:
+    debug: ^4.4.0
+    extract-zip: ^2.0.1
+    progress: ^2.0.3
+    proxy-agent: ^6.5.0
+    semver: ^7.7.1
+    tar-fs: ^3.0.8
+    yargs: ^17.7.2
+  bin:
+    browsers: lib/cjs/main-cli.js
+  checksum: a8f8fcb1d2a660ca1d45e29e4bfe072923f51e5a2b2c28df010f22d563bd90e236f2eb0fdc043e638148d7308584cd15010373412a225dc849b6c95df2808f74
+  languageName: node
+  linkType: hard
+
 "@puppeteer/browsers@npm:2.8.0":
   version: 2.8.0
   resolution: "@puppeteer/browsers@npm:2.8.0"
@@ -37,23 +54,6 @@ __metadata:
   bin:
     browsers: lib/cjs/main-cli.js
   checksum: bab68559198b6cecf93fa66c1294c3f4517c5b17d0ff41391d8edf8d7b2e13023ec1bf0c5f33861b5eaaa6db0bfa8f45dfead8a8c7e74a697f811ab3080a087a
-  languageName: node
-  linkType: hard
-
-"@puppeteer/browsers@npm:2.9.0":
-  version: 2.9.0
-  resolution: "@puppeteer/browsers@npm:2.9.0"
-  dependencies:
-    debug: ^4.4.0
-    extract-zip: ^2.0.1
-    progress: ^2.0.3
-    proxy-agent: ^6.5.0
-    semver: ^7.7.1
-    tar-fs: ^3.0.8
-    yargs: ^17.7.2
-  bin:
-    browsers: lib/cjs/main-cli.js
-  checksum: bd3f51e73de9056d3a8b4928d37f1a3d1dd2d6b2518b96809d60321331ae56b54b8668372a0e53c277cfb452e27fdbaf9ded394b90a92ded5033c53883cbf204
   languageName: node
   linkType: hard
 
@@ -72,11 +72,11 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:*":
-  version: 22.14.0
-  resolution: "@types/node@npm:22.14.0"
+  version: 22.14.1
+  resolution: "@types/node@npm:22.14.1"
   dependencies:
     undici-types: ~6.21.0
-  checksum: 8bfae1d3c428b122d23750690bdc5b8295a53949823563ec60654a24ece98bde4fc0d2b5f06ddc6def6f01a08dfe62cece7c93e60964b74f736145dad5ee1302
+  checksum: e22363f40ac8290da2bb5261c2b348241fd93b000908cefd3c56575df9d4f6b8d102fc8631275eac7ec4a9e0ac4f38f01c9d8104ebbda76c936aef96fd1e55f3
   languageName: node
   linkType: hard
 
@@ -265,10 +265,10 @@ __metadata:
 
 "contentdroplet@github:qtvhao/ContentDroplet":
   version: 1.0.0
-  resolution: "contentdroplet@https://github.com/qtvhao/ContentDroplet.git#commit=0a5feb055b1d723bdafbcd5d1cb1e7d4cf70ad10"
+  resolution: "contentdroplet@https://github.com/qtvhao/ContentDroplet.git#commit=fe8a86b76c1f047bbfc371b309b476bb25eaa86b"
   dependencies:
     puppeteerconnect.ts: "github:qtvhao/PuppeteerConnect.ts"
-  checksum: 140b6bf7c9974f0a6b43a26852d7436ea4e3489a04284f5d229dde276156450aa3e8aa890044d6e0771154c80326d5699a00e962f2e605dba43aa0d1336d00f9
+  checksum: ba44e12aa53c1d9e0e95ca78f981ecb5eb5898b0a6bc8f7f808289d52aeb12d5d9dba9942152b8886c287512c02656551873dc8a884443a7d02a431852944cbe
   languageName: node
   linkType: hard
 
@@ -334,9 +334,9 @@ __metadata:
   linkType: hard
 
 "dotenv@npm:^16.4.7":
-  version: 16.4.7
-  resolution: "dotenv@npm:16.4.7"
-  checksum: c27419b5875a44addcc56cc69b7dc5b0e6587826ca85d5b355da9303c6fc317fc9989f1f18366a16378c9fdd9532d14117a1abe6029cc719cdbbef6eaef2cea4
+  version: 16.5.0
+  resolution: "dotenv@npm:16.5.0"
+  checksum: 6543fe87b5ddf2d60dd42df6616eec99148a5fc150cb4530fef5bda655db5204a3afa0e6f25f7cd64b20657ace4d79c0ef974bec32fdb462cad18754191e7a90
   languageName: node
   linkType: hard
 
@@ -744,17 +744,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer-core@npm:24.6.0":
-  version: 24.6.0
-  resolution: "puppeteer-core@npm:24.6.0"
+"puppeteer-core@npm:24.6.1":
+  version: 24.6.1
+  resolution: "puppeteer-core@npm:24.6.1"
   dependencies:
-    "@puppeteer/browsers": 2.9.0
+    "@puppeteer/browsers": 2.10.0
     chromium-bidi: 3.0.0
     debug: ^4.4.0
     devtools-protocol: 0.0.1425554
     typed-query-selector: ^2.12.0
     ws: ^8.18.1
-  checksum: e517133ea9650469727d9af0ae167a42400bb4c7ecae685b20937d37febc6cbd5f76edf5616246561c5a86322abef6386f36e4b2fae3586a6d3b8248ccb542c5
+  checksum: 59b99b58b6a75ef9675baa00ab23ee13513cf384dcd27c70add5eb34d7e97eab2177a6f5158f79d7a33f765b0cf6b5f8d1fbc306c3958cd50a8903da36fe22a8
   languageName: node
   linkType: hard
 
@@ -775,18 +775,18 @@ __metadata:
   linkType: hard
 
 "puppeteer@npm:^24.4.0":
-  version: 24.6.0
-  resolution: "puppeteer@npm:24.6.0"
+  version: 24.6.1
+  resolution: "puppeteer@npm:24.6.1"
   dependencies:
-    "@puppeteer/browsers": 2.9.0
+    "@puppeteer/browsers": 2.10.0
     chromium-bidi: 3.0.0
     cosmiconfig: ^9.0.0
     devtools-protocol: 0.0.1425554
-    puppeteer-core: 24.6.0
+    puppeteer-core: 24.6.1
     typed-query-selector: ^2.12.0
   bin:
     puppeteer: lib/cjs/puppeteer/node/cli.js
-  checksum: 3cf6efb500fc9ab7d8acb1efb2a9e1b7bb1db0bf82243c0791f876b206328b28a15afacfde8ed4122507b17ba135c57c2daf29fb833dd13d3ddf23e578293083
+  checksum: fab96c2d9e87be26dd119b0e874edfde130577674bf30762f981b13a572597a134b60674b0592b2d58e04ecae4571c4cff2079f836e16d0309de21b979b83588
   languageName: node
   linkType: hard
 
@@ -1039,10 +1039,10 @@ __metadata:
 
 "ystudio-analytics-agent@github:qtvhao/ystudio-analytics-agent":
   version: 1.0.0
-  resolution: "ystudio-analytics-agent@https://github.com/qtvhao/ystudio-analytics-agent.git#commit=ea838f4d0ca5281570c8e970b93252859294bbfe"
+  resolution: "ystudio-analytics-agent@https://github.com/qtvhao/ystudio-analytics-agent.git#commit=b74aaebecb696e733c6eec03d20b2e830ce92d9c"
   dependencies:
     puppeteer: ^24.4.0
-  checksum: b3135475ea3e435d3af3235c125cd569cad60d952d7d784bba3c8fb9bab787f8e3aced87158b504aed0fd616639c27504a20e94328679f5ea5f6f7e2e6663756
+  checksum: 1bfa7d51ede107b4e7409bf4534c1cc133f98eb97d4b1f953970c934bdb7835e478dbe82aec5e7fd162e70cbccbfb45668638596dcb210f4a077c594ff899fbd
   languageName: node
   linkType: hard
 
