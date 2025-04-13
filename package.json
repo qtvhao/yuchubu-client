@@ -22,9 +22,11 @@
     "dotenv": "^16.4.7",
     "marked": "^15.0.8",
     "node-cron": "^3.0.3",
+    "winston": "^3.17.0",
     "ystudio-analytics-agent": "github:qtvhao/ystudio-analytics-agent"
   },
   "devDependencies": {
-    "@types/node-cron": "^3.0.11"
+    "@types/node-cron": "^3.0.11",
+    "@types/winston": "^2.4.4"
   }
 }

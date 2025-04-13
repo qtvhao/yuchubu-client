@@ -82,7 +82,12 @@ export class SyncChannelAnalyticsScheduler {
 
     try {
       const content = fs.readFileSync(filePath, 'utf-8');
-      return content.split('\n').map(l => l.trim()).filter(Boolean);
+      return content.split('\n').map(l => l.trim()).filter(Boolean).map(t => {
+        return {
+          alt: t,
+          src: '',
+        }
+      });
     } catch (err) {
       console.error('Failed to read added-impressions.txt:', (err as Error).message);
       return [];
@@ -93,6 +98,9 @@ export class SyncChannelAnalyticsScheduler {
    * Publish sync results
    */
   private async publishSyncResult(impressions: any[], status: 'success' | 'failure', error?: string) {
+    if (!impressions || impressions.length === 0) {
+      throw new Error('Cannot publish sync result: impressions must not be empty.');
+    }
     await this.publisher.publish({
       timestamp: new Date().toISOString(),
       status,
