@@ -3,6 +3,8 @@ import { YoutubeStudio } from 'ystudio-analytics-agent/dist/YoutubeStudio.js';
 import { PublisherService } from '../utils/PublisherService.js';
 import { PuppeteerConnect } from 'puppeteerconnect.ts/dist/PuppeteerConnect.js'
 import dotenv from 'dotenv'
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config()
 
@@ -42,6 +44,62 @@ export class SyncChannelAnalyticsScheduler {
     if (eventCallbacks && eventCallbacks.length > 0) {
       eventCallbacks.forEach(cb => cb(data));
     }
+  }
+
+  /**
+   * Validate if the studio is initialized
+   */
+  private validateStudioInitialized(): boolean {
+    if (!this.studio) {
+      console.error('YoutubeStudio is not initialized.');
+      this.emit('syncFailure', { message: 'YoutubeStudio is not initialized.' });
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Fetch analytics data from the studio
+   */
+  private async fetchAnalyticsData() {
+    const watchTime = await this.studio!.fetchAndSaveWatchTimeByContentPage();
+    const subscribers = await this.studio!.fetchAndSaveSubscribersByContentPage();
+    const impressions = await this.studio!.fetchAndSaveImpressionsByContentPage();
+
+    return {
+      watchTime: watchTime.slice(0, 2),
+      subscribers: subscribers.slice(0, 2),
+      impressions: impressions.slice(0, 2),
+    };
+  }
+
+  /**
+   * Read additional impressions from file
+   */
+  private readAdditionalImpressions(): any[] {
+    const filePath = path.resolve('added-impressions.txt');
+    if (!fs.existsSync(filePath)) return [];
+
+    try {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      return content.split('\n').map(l => l.trim()).filter(Boolean);
+    } catch (err) {
+      console.error('Failed to read added-impressions.txt:', (err as Error).message);
+      return [];
+    }
+  }
+
+  /**
+   * Publish sync results
+   */
+  private async publishSyncResult(impressions: any[], status: 'success' | 'failure', error?: string) {
+    await this.publisher.publish({
+      timestamp: new Date().toISOString(),
+      status,
+      impressions: status === 'success' ? impressions : undefined,
+      error,
+      accountId: ACCOUNT_ID,
+    });
   }
 
   /**
@@ -95,50 +153,26 @@ export class SyncChannelAnalyticsScheduler {
    */
   private async syncAnalytics(): Promise<void> {
     console.log(`[${new Date().toISOString()}] Syncing channel analytics...`);
-
     this.emit('syncStart');
 
-    if (!this.studio) {
-      console.error('YoutubeStudio is not initialized.');
-      this.emit('syncFailure', { message: 'YoutubeStudio is not initialized.' });
-      return;
-    }
+    if (!this.validateStudioInitialized()) return;
 
     try {
-      const impressions0 = await this.studio.fetchAndSaveWatchTimeByContentPage();
-      const firstFiveImpressions0 = impressions0.slice(0, 2);
-      console.log(`[${new Date().toISOString()}] Fetched ${impressions0} watch time data.`);
-      
-      const subscribers = await this.studio.fetchAndSaveSubscribersByContentPage();
-      const firstFiveSubscribers = subscribers.slice(0, 2);
-      console.log(`[${new Date().toISOString()}] Fetched ${subscribers.length} subscriber data.`);
+      const { watchTime, subscribers, impressions } = await this.fetchAnalyticsData();
+      const added = this.readAdditionalImpressions();
 
-      const allImpressions = await this.studio.fetchAndSaveImpressionsByContentPage();
-      const impressions = allImpressions.slice(0, 2);
-      console.log(`[${new Date().toISOString()}] Fetched ${impressions.length} impressions.`);
-      
-      const concatImpressions = firstFiveImpressions0.concat(impressions, firstFiveSubscribers).sort(() => Math.random() - 0.5);
+      const allImpressions = [...watchTime, ...subscribers, ...impressions, ...added]
+        .sort(() => Math.random() - 0.5);
 
-      await this.publisher.publish({
-        timestamp: new Date().toISOString(),
-        status: 'success',
-        impressions: concatImpressions,
-        accountId: ACCOUNT_ID,
-      });
+      await this.publishSyncResult(allImpressions, 'success');
 
       console.log(`[${new Date().toISOString()}] Sync completed successfully.`);
+      this.emit('syncSuccess', { impressions: allImpressions });
+      await PuppeteerConnect.killAllChromeProcesses();
 
-      this.emit('syncSuccess', { impressions });
-      await PuppeteerConnect.killAllChromeProcesses()
     } catch (error: any) {
       console.error(`[${new Date().toISOString()}] Sync failed:`, error.message);
-
-      await this.publisher.publish({
-        timestamp: new Date().toISOString(),
-        status: 'failure',
-        error: error.message
-      });
-
+      await this.publishSyncResult([], 'failure', error.message);
       this.emit('syncFailure', { message: error.message });
     }
   }
