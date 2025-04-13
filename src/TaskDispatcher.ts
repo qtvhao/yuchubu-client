@@ -51,16 +51,28 @@ class Config {
 
 export class TaskDispatcher {
   private async logTaskProgress(taskId: string, attempts = 5): Promise<void> {
+    const RETRY_DELAY_MS = 30_000;
+
     for (let attempt = 1; attempt <= attempts; attempt++) {
       try {
         const progressResponse: AxiosResponse = await axios.get(
           `${Config.BASE_URL}/tasks/progress/${taskId}`,
           {
             validateStatus: function (status) {
-              return status === 200 || status === 404;
+              return status === 200 || status === 404 || (status >= 500 && status < 600);
             }
           }
         );
+
+        if (progressResponse.status >= 500 && progressResponse.status < 600) {
+          logger.warn(`Attempt ${attempt}/${attempts} - Server error (${progressResponse.status}). Retrying in ${RETRY_DELAY_MS / 1000} seconds...`);
+          if (attempt < attempts) {
+            await Utility.delay(RETRY_DELAY_MS);
+            continue;
+          }
+        } else if (progressResponse.status !== 200 && progressResponse.status !== 404) {
+          throw new Error(`Unexpected response status: ${progressResponse.status}`);
+        }
 
         const currentStep = progressResponse.data?.currentStep;
         const progressBar = progressResponse.data?.progressBar;
@@ -76,16 +88,19 @@ export class TaskDispatcher {
           const progressWithPercent = `${progressBar} ${percent}%`;
           logger.info(progressWithPercent);
         }
+
         return;
       } catch (error) {
-        logger.warn(`Attempt ${attempt}/${attempts} - Failed to fetch task progress: ${error}`);
+        logger.error(`Attempt ${attempt}/${attempts} - Error logging task progress: ${error}`);
         if (attempt < attempts) {
-          await Utility.delay(2000); // optional delay before retry
+          await Utility.delay(RETRY_DELAY_MS);
         } else {
           throw error;
         }
       }
     }
+
+    throw new Error(`Failed to log task progress after ${attempts} attempts.`);
   }
 
   private async getTaskCompletionStatus(taskId: string): Promise<AxiosResponse> {
