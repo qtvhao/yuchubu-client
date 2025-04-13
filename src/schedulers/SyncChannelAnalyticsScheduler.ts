@@ -94,6 +94,21 @@ export class SyncChannelAnalyticsScheduler {
     }
   }
 
+  private async gatherImpressions(): Promise<Map<string, any>> {
+    const { watchTime, subscribers, impressions } = await this.fetchAnalyticsData();
+    const added = this.readAdditionalImpressions();
+
+    const mergedImpressions = [...watchTime, ...subscribers, ...impressions, ...added];
+    const uniqueImpressionsMap = new Map<string, any>();
+    for (const item of mergedImpressions) {
+      if (item && item.alt) {
+        uniqueImpressionsMap.set(item.alt, item);
+      }
+    }
+
+    return uniqueImpressionsMap;
+  }
+
   /**
    * Publish sync results
    */
@@ -166,11 +181,8 @@ export class SyncChannelAnalyticsScheduler {
     if (!this.validateStudioInitialized()) return;
 
     try {
-      const { watchTime, subscribers, impressions } = await this.fetchAnalyticsData();
-      const added = this.readAdditionalImpressions();
-
-      const allImpressions = [...watchTime, ...subscribers, ...impressions, ...added]
-        .sort(() => Math.random() - 0.5);
+      const uniqueImpressionsMap = await this.gatherImpressions();
+      const allImpressions = this.prepareFinalImpressions(uniqueImpressionsMap);
 
       await this.publishSyncResult(allImpressions, 'success');
 
@@ -183,5 +195,22 @@ export class SyncChannelAnalyticsScheduler {
       await this.publishSyncResult([], 'failure', error.message);
       this.emit('syncFailure', { message: error.message });
     }
+  }
+
+  private prepareFinalImpressions(impressionMap: Map<string, any>): any[] {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const formattedYesterday = yesterday.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    return Array.from(impressionMap.values())
+      .map(item => ({
+        ...item,
+        alt: typeof item.alt === 'string' ? item.alt.replace(/&lt;yesterday&gt;|<yesterday>/g, formattedYesterday) : item.alt,
+      }))
+      .sort(() => Math.random() - 0.5);
   }
 }
