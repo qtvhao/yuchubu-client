@@ -196,14 +196,20 @@ export class TaskDispatcher {
     return 'timeout';
   }
 
-  private findLongestStrongTokenText(tokens: TokensList): string {
+  private findLongestStrongTokenText(tokens: TokensList, whichLessThan: number = 100): string {
     const strongTokens = TokenUtils.findTokensOfType(tokens, 'strong');
 
     if (!strongTokens || strongTokens.length === 0) {
       return '';
     }
 
-    return strongTokens.reduce((longest, token) => {
+    const filteredTokens = strongTokens.filter(token => typeof token.text === 'string' && token.text.length < whichLessThan);
+
+    if (filteredTokens.length === 0) {
+      return '';
+    }
+
+    return filteredTokens.reduce((longest, token) => {
       return token.text.length > longest.length ? token.text : longest;
     }, '');
   }
@@ -228,8 +234,12 @@ export class TaskDispatcher {
     });
 
     const tokens: TokensList = response.data?.tokens
-    const longestTitle = this.findLongestStrongTokenText(tokens);
+    let longestTitle = this.findLongestStrongTokenText(tokens, 100);
     
+    if (!longestTitle) {
+      throw new Error(`No valid title found in strong tokens for task ${taskId}`);
+    }
+
     const content = response.data?.content;
     const downloads = response.data?.downloads;
     if (!Array.isArray(downloads) || downloads.length === 0) {
