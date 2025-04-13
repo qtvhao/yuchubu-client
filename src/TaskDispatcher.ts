@@ -196,6 +196,18 @@ export class TaskDispatcher {
     return 'timeout';
   }
 
+  private findLongestStrongTokenText(tokens: TokensList): string {
+    const strongTokens = TokenUtils.findTokensOfType(tokens, 'strong');
+
+    if (!strongTokens || strongTokens.length === 0) {
+      return '';
+    }
+
+    return strongTokens.reduce((longest, token) => {
+      return token.text.length > longest.length ? token.text : longest;
+    }, '');
+  }
+
   async downloadTaskResult(taskId: string, downloadIndex: number = 0): Promise<Buffer> {
     const downloadUrl = `${Config.BASE_URL}/tasks/completed/${taskId}/downloads/${downloadIndex}`;
     const response = await axios.get(downloadUrl, {
@@ -216,18 +228,8 @@ export class TaskDispatcher {
     });
 
     const tokens: TokensList = response.data?.tokens
-    const strongTokens = TokenUtils.findTokensOfType(tokens, 'strong')
+    const longestTitle = this.findLongestStrongTokenText(tokens);
     
-    if (!strongTokens || strongTokens.length === 0) {
-      logger.error("No strong tokens found.", {
-        tokens,
-        content: response.data?.content,
-        downloads: response.data?.downloads
-      });
-      throw new Error(`No strong tokens found for task ${taskId}`);
-    }
-    
-    const longestTitle = (strongTokens[0].text);
     const content = response.data?.content;
     const downloads = response.data?.downloads;
     if (!Array.isArray(downloads) || downloads.length === 0) {
