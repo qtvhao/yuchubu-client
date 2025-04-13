@@ -50,26 +50,41 @@ class Config {
 // === Task Dispatching Logic ===
 
 export class TaskDispatcher {
-  private async logTaskProgress(taskId: string): Promise<void> {
-    const progressResponse: AxiosResponse = await axios.get(
-      `${Config.BASE_URL}/tasks/progress/${taskId}`,
-      {
-        validateStatus: function (status) {
-          return status === 200 || status === 404;
+  private async logTaskProgress(taskId: string, attempts = 5): Promise<void> {
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      try {
+        const progressResponse: AxiosResponse = await axios.get(
+          `${Config.BASE_URL}/tasks/progress/${taskId}`,
+          {
+            validateStatus: function (status) {
+              return status === 200 || status === 404;
+            }
+          }
+        );
+
+        const currentStep = progressResponse.data?.currentStep;
+        const progressBar = progressResponse.data?.progressBar;
+        const percent = progressResponse.data?.progress;
+
+        if (currentStep) {
+          logger.info("" + currentStep);
+          if (currentStep.includes("❌")) {
+            throw new Error(`Aborting due to failure state in task: ${currentStep}`);
+          }
+        }
+        if (percent && percent > 0) {
+          const progressWithPercent = `${progressBar} ${percent}%`;
+          logger.info(progressWithPercent);
+        }
+        return;
+      } catch (error) {
+        logger.warn(`Attempt ${attempt}/${attempts} - Failed to fetch task progress: ${error}`);
+        if (attempt < attempts) {
+          await Utility.delay(2000); // optional delay before retry
+        } else {
+          throw error;
         }
       }
-    );
-
-    const currentStep = progressResponse.data?.currentStep;
-    const progressBar = progressResponse.data?.progressBar;
-    const percent = progressResponse.data?.progress;
-
-    if (currentStep) {
-      logger.info("" + currentStep);
-    }
-    if (percent && percent > 0) {
-      const progressWithPercent = `${progressBar} ${percent}%`;
-      logger.info(progressWithPercent);
     }
   }
 
