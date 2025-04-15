@@ -23,20 +23,25 @@ export class SchedulerManager {
   }
 
   private async handleSyncSuccess(): Promise<void> {
+    console.log('[SchedulerManager] handleSyncSuccess triggered');
     const totalProfiler = this.startTotalDispatchProfiler();
 
     try {
+      console.log('[SchedulerManager] Starting task dispatch...');
       const taskId = await this.taskDispatcher.dispatchTaskWithRetry();
       totalProfiler.end();
 
       if (taskId) {
+        console.log('[SchedulerManager] Task dispatch returned taskId:', taskId);
         await this.handleDispatchSuccess(taskId);
       } else {
+        console.log('[SchedulerManager] No taskId returned, dispatch considered failed.');
         this.handleDispatchFailure(null);
       }
 
     } catch (error) {
       totalProfiler.end();
+      console.error('[SchedulerManager] Error during task dispatch:', error);
       this.handleDispatchFailure(error as Error);
     }
   }
