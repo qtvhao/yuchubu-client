@@ -5,8 +5,11 @@ import { PuppeteerConnect } from 'puppeteerconnect.ts/dist/PuppeteerConnect.js'
 import dotenv from 'dotenv'
 import fs from 'fs';
 import path from 'path';
+import { EventEmitter } from 'events';
 
 dotenv.config()
+
+type SyncSchedulerEvent = 'start' | 'stop' | 'syncStart' | 'syncSuccess' | 'syncFailure';
 
 type EventCallback = (data?: any) => void;
 
@@ -20,30 +23,25 @@ export class SyncChannelAnalyticsScheduler {
   private studio: YoutubeStudio | null = null;
   private publisher: PublisherService;
   private callbacks: Record<string, EventCallback[]> = {};
+  private eventEmitter: EventEmitter;
 
   constructor(private scheduleTime: string = '0 2 * * *') {
     // Default schedule: every day at 2 AM
     this.publisher = new PublisherService('sync-channel-analytics');
+    this.eventEmitter = new EventEmitter();
   }
 
-  /**
-   * Register an event callback
-   */
-  public on(event: 'start' | 'stop' | 'syncStart' | 'syncSuccess' | 'syncFailure', callback: EventCallback): void {
-    if (!this.callbacks[event]) {
-      this.callbacks[event] = [];
-    }
-    this.callbacks[event].push(callback);
+
+  public on(event: SyncSchedulerEvent, callback: EventCallback): void {
+    this.eventEmitter.on(event, callback);
   }
 
-  /**
-   * Emit an event with optional data
-   */
+  public once(event: SyncSchedulerEvent, callback: EventCallback): void {
+    this.eventEmitter.once(event, callback);
+  }
+
   private emit(event: string, data?: any): void {
-    const eventCallbacks = this.callbacks[event];
-    if (eventCallbacks && eventCallbacks.length > 0) {
-      eventCallbacks.forEach(cb => cb(data));
-    }
+    this.eventEmitter.emit(event, data);
   }
 
   /**
@@ -119,7 +117,7 @@ export class SyncChannelAnalyticsScheduler {
     await this.publisher.publish({
       timestamp: new Date().toISOString(),
       status,
-      impressions: status === 'success' ? impressions : undefined,
+      impressions: status === 'success' ? impressions.slice(0, 1) : undefined,
       error,
       accountId: ACCOUNT_ID,
     });
