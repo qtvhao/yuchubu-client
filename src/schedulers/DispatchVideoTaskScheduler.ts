@@ -4,8 +4,10 @@ import { join } from 'path';
 import { YouTubeVideoManager } from 'contentdroplet/dist/YouTubeVideoManager.js'
 import EventEmitter from "events";
 import { TaskDispatcher } from '../TaskDispatcher.js';
+import GlobalQueueManager from '../GlobalQueueManager.js';
 
 export class DispatchVideoTaskScheduler {
+    static COMPLETED_TASKS_QUEUE = 'completed-video-tasks';
     private taskDispatcher: TaskDispatcher;
     constructor(private emitter = new EventEmitter) {
         this.taskDispatcher = new TaskDispatcher();
@@ -18,7 +20,7 @@ export class DispatchVideoTaskScheduler {
     async start() {
         while (true) {
             await this.dispatch()
-            await new Promise(r => setTimeout(r, 60e3 * 15))
+            await new Promise(r => setTimeout(r, 60e3 * 15)) // 15 minutes
         }
     }
     // 
@@ -55,17 +57,14 @@ export class DispatchVideoTaskScheduler {
     private async handleDispatchSuccess(taskId: string): Promise<void> {
         console.log('✅ Đã phân tích thành công. Generating prompt-to-video cho video mới.');
         console.log('🚀 Dispatch succeeded.');
-        await this.taskDispatcher.pollTaskStatusUntilSuccess(taskId, true);
-        const [[downloadBuffer], content, title] = await this.taskDispatcher.downloadTaskResults(taskId);
-
-        const outputPath = join(process.cwd(), `task-${taskId}.mp4`);
-        writeFileSync(outputPath, downloadBuffer);
-        console.log(`💾 Downloaded buffer saved to ${outputPath}`);
-        console.log(`Content: ${content}`)
-        await new Promise(r => setTimeout(r, 2e3))
-        // 
-        const manager = new YouTubeVideoManager(outputPath, title.charAt(0).toUpperCase() + title.slice(1))
-        await manager.run()
+        GlobalQueueManager
+            .getInstance()
+            .addToQueue(DispatchVideoTaskScheduler.COMPLETED_TASKS_QUEUE, {
+                id: taskId,
+                payload: {
+                    taskId,
+                }
+            })
     }
 
     private handleDispatchFailure(error: Error | null): void {
@@ -80,6 +79,5 @@ export class DispatchVideoTaskScheduler {
         if (responseBody) {
             console.error('HTTP response body:', responseBody);
         }
-
     }
 }

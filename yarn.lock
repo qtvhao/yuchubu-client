@@ -352,7 +352,7 @@ __metadata:
 
 "contentdroplet@github:qtvhao/ContentDroplet":
   version: 1.0.0
-  resolution: "contentdroplet@https://github.com/qtvhao/ContentDroplet.git#commit=5e14d3b09f12056999cc2c37a2bbc9c1b8e93b10"
+  resolution: "contentdroplet@https://github.com/qtvhao/ContentDroplet.git#commit=f575e0230358da3f1b46abd6d9eba6d18608d548"
   dependencies:
     puppeteerconnect.ts: "github:qtvhao/PuppeteerConnect.ts"
   checksum: e1c1e3f3b479fea29d8ba576a0cb6c82a7a9bb92320c3d59e0351209eb048939a3e4485c3048b0e628d026983f06bca5bed90cc420f1802fda7c8c10023917aa
@@ -951,10 +951,10 @@ __metadata:
 
 "puppeteerconnect.ts@github:qtvhao/PuppeteerConnect.ts":
   version: 1.0.0
-  resolution: "puppeteerconnect.ts@https://github.com/qtvhao/PuppeteerConnect.ts.git#commit=118a40b23b375d9a05bb29d62d3bc94b4a838aae"
+  resolution: "puppeteerconnect.ts@https://github.com/qtvhao/PuppeteerConnect.ts.git#commit=77944abd095216df8b72346a7e1ad5b3c6f27ad1"
   dependencies:
     puppeteer: 24.4.0
-  checksum: 2024a8dd6e68a6f5615be1cc95d57f0ab5adb7532edb30786c84d584d1cd2755bb904101917516f207643b36f241bd41f9fe5521328568deb45a56128e551db3
+  checksum: 4329617f78d8258effaf570fe6989ab8d1a64e845ec8df9d7bc3e05080848b2ce5b5ab2858426a588fdb14ac9db9ff98491b9c9ab593463f65fec3b05d042d00
   languageName: node
   linkType: hard
 
@@ -1299,10 +1299,10 @@ __metadata:
 
 "ystudio-analytics-agent@github:qtvhao/ystudio-analytics-agent":
   version: 1.0.0
-  resolution: "ystudio-analytics-agent@https://github.com/qtvhao/ystudio-analytics-agent.git#commit=b74aaebecb696e733c6eec03d20b2e830ce92d9c"
+  resolution: "ystudio-analytics-agent@https://github.com/qtvhao/ystudio-analytics-agent.git#commit=4981d3a3a22fb1c03841886669554f5c9662f4d7"
   dependencies:
     puppeteer: ^24.4.0
-  checksum: 1bfa7d51ede107b4e7409bf4534c1cc133f98eb97d4b1f953970c934bdb7835e478dbe82aec5e7fd162e70cbccbfb45668638596dcb210f4a077c594ff899fbd
+  checksum: ffe7ae5f177090523c237921885baa28b7a43e874f9cc80792ab6bf786bb8dd3fbe199645d8f5449f4033428f7bcc563b2f23c45e70f3978f60cc5ff0722814e
   languageName: node
   linkType: hard
 
