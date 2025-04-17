@@ -50,4 +50,23 @@ export default class GlobalQueueManager {
   public getAllQueueNames(): string[] {
     return Array.from(this.queues.keys());
   }
+
+  public async process(queueName: string, processor: (item: QueueItem) => Promise<void>): Promise<void> {
+    if (!this.queues.has(queueName)) {
+      this.queues.set(queueName, []);
+    }
+    const queue = this.queues.get(queueName)!;
+
+    while (true) {
+      if (queue.length > 0) {
+        const item = queue.shift();
+        if (item) {
+          await processor(item);
+        }
+      } else {
+        // Wait a short time before checking again
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    }
+  }
 }

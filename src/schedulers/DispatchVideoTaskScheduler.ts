@@ -8,6 +8,7 @@ import GlobalQueueManager from '../GlobalQueueManager.js';
 
 export class DispatchVideoTaskScheduler {
     static COMPLETED_TASKS_QUEUE = 'completed-video-tasks';
+    static DISPATCHED_TASKS_QUEUE = 'dispatched-video-tasks';
     private taskDispatcher: TaskDispatcher;
     constructor(private emitter = new EventEmitter) {
         this.taskDispatcher = new TaskDispatcher();
@@ -59,7 +60,7 @@ export class DispatchVideoTaskScheduler {
         console.log('🚀 Dispatch succeeded.');
         GlobalQueueManager
             .getInstance()
-            .addToQueue(DispatchVideoTaskScheduler.COMPLETED_TASKS_QUEUE, {
+            .addToQueue(DispatchVideoTaskScheduler.DISPATCHED_TASKS_QUEUE, {
                 id: taskId,
                 payload: {
                     taskId,

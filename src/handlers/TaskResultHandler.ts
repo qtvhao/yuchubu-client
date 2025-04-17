@@ -1,4 +1,3 @@
-
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { YouTubeVideoManager } from 'contentdroplet/dist/YouTubeVideoManager.js';
@@ -11,16 +10,28 @@ export class TaskResultHandler {
         this.taskDispatcher = new TaskDispatcher();
     }
 
-    public async pollAndDownloadResults(taskId: string): Promise<void> {
+    private async waitForTaskCompletion(taskId: string): Promise<void> {
         await this.taskDispatcher.pollTaskStatusUntilSuccess(taskId, true);
-        const [[downloadBuffer], content, title] = await this.taskDispatcher.downloadTaskResults(taskId);
+    }
 
+    private async downloadTaskOutput(taskId: string): Promise<[Buffer, string, string]> {
+        const [[downloadBuffer], content, title] = await this.taskDispatcher.downloadTaskResults(taskId);
+        return [downloadBuffer, content, title];
+    }
+
+    private saveToFile(downloadBuffer: Buffer, taskId: string): string {
         const outputPath = join(process.cwd(), `task-${taskId}.mp4`);
         writeFileSync(outputPath, downloadBuffer);
         console.log(`💾 Downloaded buffer saved to ${outputPath}`);
+        return outputPath;
+    }
+
+    public async pollAndDownloadResults(taskId: string): Promise<any> {
+        await this.waitForTaskCompletion(taskId);
+        const [downloadBuffer, content, title] = await this.downloadTaskOutput(taskId);
         console.log(`Content: ${content}`);
-        await new Promise(r => setTimeout(r, 2e3));
-        const manager = new YouTubeVideoManager(outputPath, title.charAt(0).toUpperCase() + title.slice(1));
-        await manager.run();
+        const outputPath = this.saveToFile(downloadBuffer, taskId);
+
+        return [outputPath, title]
     }
 }

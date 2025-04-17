@@ -1,4 +1,3 @@
 import { SchedulerManager } from "./SchedulerManager.js";
 
-const schedulerManager = new SchedulerManager();
-schedulerManager.start();
+export const schedulerManager = new SchedulerManager();
