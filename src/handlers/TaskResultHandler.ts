@@ -26,11 +26,16 @@ export class TaskResultHandler {
         return outputPath;
     }
 
-    public async pollAndDownloadResults(taskId: string): Promise<any> {
-        await this.waitForTaskCompletion(taskId);
+    async handleDownloadAndSave(taskId: string): Promise<[string, string]> {
         const [downloadBuffer, content, title] = await this.downloadTaskOutput(taskId);
         console.log(`Content: ${content}`);
         const outputPath = this.saveToFile(downloadBuffer, taskId);
+        return [outputPath, title];
+    }
+
+    public async pollAndDownloadResults(taskId: string): Promise<any> {
+        await this.waitForTaskCompletion(taskId);
+        const [outputPath, title] = await this.handleDownloadAndSave(taskId);
 
         return [outputPath, title]
     }

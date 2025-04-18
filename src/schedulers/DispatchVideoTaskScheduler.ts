@@ -24,7 +24,6 @@ export class DispatchVideoTaskScheduler {
             await new Promise(r => setTimeout(r, 60e3 * 15)) // 15 minutes
         }
     }
-    // 
 
     private async dispatch(): Promise<void> {
         console.log('[SchedulerManager] handleSyncSuccess triggered');

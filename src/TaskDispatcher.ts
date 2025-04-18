@@ -34,6 +34,14 @@ interface DispatchErrorResponse {
   error: string;
   taskId: string;
 }
+interface CompletedTask {
+  id: string;
+  payload: any;
+  content: string;
+  translated: boolean;
+  tokens: TokensList;
+  downloads: any[];
+}
 
 function isDispatchErrorResponse(
   res: DispatchSuccessResponse | DispatchErrorResponse
@@ -50,6 +58,15 @@ class Config {
 // === Task Dispatching Logic ===
 
 export class TaskDispatcher {
+  private static instance: TaskDispatcher;
+
+  static getInstance(): TaskDispatcher {
+    if (!TaskDispatcher.instance) {
+      TaskDispatcher.instance = new TaskDispatcher();
+    }
+    return TaskDispatcher.instance;
+  }
+
   private async logTaskProgress(taskId: string, attempts = 5): Promise<void> {
     const RETRY_DELAY_MS = 30_000;
 
@@ -290,5 +307,15 @@ export class TaskDispatcher {
     }
 
     return [buffers, content, longestTitle];
+  }
+
+  async getCompletedTasksForAccount(): Promise<CompletedTask[]> {
+    const accountId = ACCOUNT_ID;
+    const response = await axios.get(`${Config.BASE_URL}/tasks/completed/account/${accountId}`)
+    const {
+      completedTasks,
+    } = response.data;
+
+    return completedTasks;
   }
 }
