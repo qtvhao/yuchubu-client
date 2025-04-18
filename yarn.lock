@@ -352,10 +352,10 @@ __metadata:
 
 "contentdroplet@github:qtvhao/ContentDroplet":
   version: 1.0.0
-  resolution: "contentdroplet@https://github.com/qtvhao/ContentDroplet.git#commit=f575e0230358da3f1b46abd6d9eba6d18608d548"
+  resolution: "contentdroplet@https://github.com/qtvhao/ContentDroplet.git#commit=9d8bfba867b5c2514ee2986230f6563a963f67db"
   dependencies:
     puppeteerconnect.ts: "github:qtvhao/PuppeteerConnect.ts"
-  checksum: e1c1e3f3b479fea29d8ba576a0cb6c82a7a9bb92320c3d59e0351209eb048939a3e4485c3048b0e628d026983f06bca5bed90cc420f1802fda7c8c10023917aa
+  checksum: cab2c5da3be0d9e219f95120f19fb668abb8b8e1d617d04287499987473754beb6e4fac5980a3fb2c5c21f2a9c76f402f54886ba03a26313b8df1bb48b661a39
   languageName: node
   linkType: hard
 
@@ -1322,8 +1322,8 @@ __metadata:
   linkType: soft
 
 "zod@npm:^3.24.1":
-  version: 3.24.2
-  resolution: "zod@npm:3.24.2"
-  checksum: c02455c09678c5055c636d64f9fcda2424fea0aa46ac7d9681e7f41990bc55f488bcd84b9d7cfef0f6e906f51f55b245239d92a9f726248aa74c5b84edf00c2d
+  version: 3.24.3
+  resolution: "zod@npm:3.24.3"
+  checksum: 9c3976e61cec25908f3405502abdf28ab1893afd5182c6739a30375c5c6bf4b9b6ea7e78735324e5ac63571c160ce607ebe320ff389b044223c357ccc2f8c94c
   languageName: node
   linkType: hard

@@ -228,17 +228,17 @@ export class TaskDispatcher {
 
   private findLongestStrongTokenText(tokens: TokensList, whichLessThan: number = 100): string {
     const strongTokens = TokenUtils.findTokensOfType(tokens, 'strong');
-
+    
     if (!strongTokens || strongTokens.length === 0) {
       return '';
     }
-
-    const filteredTokens = strongTokens.filter(token => typeof token.text === 'string' && token.text.length < whichLessThan);
-
+    
+    const filteredTokens = strongTokens.filter(token => typeof token.text === 'string' && token.text.length < whichLessThan && !token.text.includes(','));
+    
     if (filteredTokens.length === 0) {
       return '';
     }
-
+    
     return filteredTokens.reduce((longest, token) => {
       return token.text.length > longest.length ? token.text : longest;
     }, '');

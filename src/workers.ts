@@ -12,7 +12,7 @@ export const workersManager = {
             const handler = new TaskResultHandler();
             const [outputPath, title] = await handler.pollAndDownloadResults(taskId);
             globalQueueManager.addToQueue(DispatchVideoTaskScheduler.COMPLETED_TASKS_QUEUE, {
-                id: '',
+                id: taskId,
                 payload: {
                     outputPath,
                     title,
@@ -21,6 +21,7 @@ export const workersManager = {
             
         });
         globalQueueManager.process(DispatchVideoTaskScheduler.COMPLETED_TASKS_QUEUE, async (dequeued) => {
+            console.log(dequeued)
             const {
                 payload: {
                     outputPath,
