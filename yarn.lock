@@ -352,10 +352,10 @@ __metadata:
 
 "contentdroplet@github:qtvhao/ContentDroplet":
   version: 1.0.0
-  resolution: "contentdroplet@https://github.com/qtvhao/ContentDroplet.git#commit=9d8bfba867b5c2514ee2986230f6563a963f67db"
+  resolution: "contentdroplet@https://github.com/qtvhao/ContentDroplet.git#commit=5c4acb9262f077386301ea16ece93d0b73e3698a"
   dependencies:
     puppeteerconnect.ts: "github:qtvhao/PuppeteerConnect.ts"
-  checksum: cab2c5da3be0d9e219f95120f19fb668abb8b8e1d617d04287499987473754beb6e4fac5980a3fb2c5c21f2a9c76f402f54886ba03a26313b8df1bb48b661a39
+  checksum: b609d1a80047206874bc372ca59649e1dfd6993ff97c1659a0c3680d595af589b33dd6fd7db2e10f01c995c018d5f7c1caac9ebcd1167e448797b97eb7971fae
   languageName: node
   linkType: hard
 
@@ -951,10 +951,10 @@ __metadata:
 
 "puppeteerconnect.ts@github:qtvhao/PuppeteerConnect.ts":
   version: 1.0.0
-  resolution: "puppeteerconnect.ts@https://github.com/qtvhao/PuppeteerConnect.ts.git#commit=77944abd095216df8b72346a7e1ad5b3c6f27ad1"
+  resolution: "puppeteerconnect.ts@https://github.com/qtvhao/PuppeteerConnect.ts.git#commit=dac1726160f851e531f5c607d00d708aca5ac538"
   dependencies:
     puppeteer: 24.4.0
-  checksum: 4329617f78d8258effaf570fe6989ab8d1a64e845ec8df9d7bc3e05080848b2ce5b5ab2858426a588fdb14ac9db9ff98491b9c9ab593463f65fec3b05d042d00
+  checksum: d4f0054a4fc794568b5fe73901056c52749ae39288beebb6e96e09336b8473e6af3810a23f43eca3c6c6bc830674c6e57075407a5f305e05ad8aaa2df0d468df
   languageName: node
   linkType: hard
 

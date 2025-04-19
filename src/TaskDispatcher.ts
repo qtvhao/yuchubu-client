@@ -261,52 +261,49 @@ export class TaskDispatcher {
     }, '');
   }
 
-  async downloadTaskResult(taskId: string, downloadIndex: number = 0): Promise<Buffer> {
-    const downloadUrl = `${Config.BASE_URL}/tasks/completed/${taskId}/downloads/${downloadIndex}`;
-    const response = await axios.get(downloadUrl, {
-      responseType: 'arraybuffer',
-      validateStatus: function (status) {
-        return status === 200;
-      }
+  private async getTaskMetadata(taskId: string) {
+    const response = await axios.get(`${Config.BASE_URL}/tasks/completed/${taskId}`, {
+      validateStatus: status => status === 200,
     });
+    return response.data;
+  }
 
-    return Buffer.from(response.data);
+  private getValidatedTaskTitle(tokens: TokensList): string {
+    const longestTitle = this.findLongestStrongTokenText(tokens, 100);
+    if (!longestTitle) {
+      throw new Error(`No valid title found in strong tokens`);
+    }
+    return longestTitle;
+  }
+
+  private async getDownloadBuffers(taskId: string, count: number): Promise<Buffer[]> {
+    const buffers: Buffer[] = [];
+    for (let i = 0; i < count; i++) {
+      const url = `${Config.BASE_URL}/tasks/completed/${taskId}/downloads/${i}`;
+      const response = await axios.get(url, {
+        responseType: 'arraybuffer',
+        validateStatus: status => status === 200,
+        onDownloadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+          logger.info(`Downloading buffer ${i + 1}/${count}: ${percentCompleted}%`);
+        },
+      });
+      buffers.push(Buffer.from(response.data));
+      logger.info(`Downloaded buffer ${i + 1}/${count}`);
+    }
+    return buffers;
   }
 
   async downloadTaskResults(taskId: string): Promise<[Buffer[], string, string]> {
-    const response = await axios.get(`${Config.BASE_URL}/tasks/completed/${taskId}`, {
-      validateStatus: function (status) {
-        return status === 200;
-      }
-    });
+    const data = await this.getTaskMetadata(taskId);
+    const title = this.getValidatedTaskTitle(data.tokens);
 
-    const tokens: TokensList = response.data?.tokens
-    let longestTitle = this.findLongestStrongTokenText(tokens, 100);
-    
-    if (!longestTitle) {
-      throw new Error(`No valid title found in strong tokens for task ${taskId}`);
-    }
-
-    const content = response.data?.content;
-    const downloads = response.data?.downloads;
-    if (!Array.isArray(downloads) || downloads.length === 0) {
+    if (!Array.isArray(data.downloads) || data.downloads.length === 0) {
       throw new Error(`No downloads found for task ${taskId}`);
     }
 
-    const buffers: Buffer[] = [];
-
-    for (let i = 0; i < downloads.length; i++) {
-      const downloadUrl = `${Config.BASE_URL}/tasks/completed/${taskId}/downloads/${i}`;
-      const fileResponse = await axios.get(downloadUrl, {
-        responseType: 'arraybuffer',
-        validateStatus: function (status) {
-          return status === 200;
-        }
-      });
-      buffers.push(Buffer.from(fileResponse.data));
-    }
-
-    return [buffers, content, longestTitle];
+    const buffers = await this.getDownloadBuffers(taskId, data.downloads.length);
+    return [buffers, data.content, title];
   }
 
   async getCompletedTasksForAccount(): Promise<CompletedTask[]> {
@@ -317,5 +314,18 @@ export class TaskDispatcher {
     } = response.data;
 
     return completedTasks;
+  }
+  
+  async archiveCompletedTask(taskId: string): Promise<void> {
+    try {
+      const response = await axios.post(`${Config.BASE_URL}/tasks/completed/${taskId}/archive`, null, {
+        validateStatus: status => status === 200,
+      });
+
+      logger.info(`Task ${taskId} archived successfully.`, { response: response.data });
+    } catch (error) {
+      logger.error(`Failed to archive task ${taskId}: ${error}`);
+      throw new Error(`Archiving task ${taskId} failed.`);
+    }
   }
 }
