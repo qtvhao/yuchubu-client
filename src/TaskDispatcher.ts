@@ -308,12 +308,22 @@ export class TaskDispatcher {
 
   async getCompletedTasksForAccount(): Promise<CompletedTask[]> {
     const accountId = ACCOUNT_ID;
-    const response = await axios.get(`${Config.BASE_URL}/tasks/completed/account/${accountId}`)
-    const {
-      completedTasks,
-    } = response.data;
-
-    return completedTasks;
+    try {
+      const response = await axios.get(`${Config.BASE_URL}/tasks/completed/account/${accountId}`, {
+        validateStatus: status => status === 200 || status === 404,
+      });
+ 
+      if (response.status === 404) {
+        logger.warn(`No completed tasks found for account ${accountId} (404).`);
+        return [];
+      }
+ 
+      const { completedTasks } = response.data;
+      return completedTasks;
+    } catch (error) {
+      logger.error(`Failed to fetch completed tasks for account ${accountId}: ${error}`);
+      throw new Error(`Fetching completed tasks failed.`);
+    }
   }
   
   async archiveCompletedTask(taskId: string): Promise<void> {
