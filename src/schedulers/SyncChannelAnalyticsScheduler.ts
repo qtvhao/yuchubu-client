@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 import fs from 'fs';
 import path from 'path';
 import { EventEmitter } from 'events';
+import { GlobalLock } from '../GlobalLock.js';
 
 dotenv.config()
 
@@ -60,9 +61,19 @@ export class SyncChannelAnalyticsScheduler {
    * Fetch analytics data from the studio
    */
   private async fetchAnalyticsData() {
-    const watchTime = await this.studio!.fetchAndSaveWatchTimeByContentPage();
-    const subscribers = await this.studio!.fetchAndSaveSubscribersByContentPage();
-    const impressions = await this.studio!.fetchAndSaveImpressionsByContentPage();
+    const result = await GlobalLock.getInstance().tryWithLock('browser_connect', async () => {
+      const watchTime = await this.studio!.fetchAndSaveWatchTimeByContentPage();
+      const subscribers = await this.studio!.fetchAndSaveSubscribersByContentPage();
+      const impressions = await this.studio!.fetchAndSaveImpressionsByContentPage();
+
+      return [watchTime, subscribers, impressions];
+    });
+
+    if (!result) {
+      throw new Error('Failed to acquire lock or fetch analytics data.');
+    }
+
+    const [watchTime, subscribers, impressions] = result;
 
     return {
       watchTime: watchTime.slice(0, 2),

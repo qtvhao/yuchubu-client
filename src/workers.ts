@@ -3,6 +3,7 @@ import { DispatchVideoTaskScheduler } from "./schedulers/DispatchVideoTaskSchedu
 import { TaskResultHandler } from "./handlers/TaskResultHandler.js";
 import { YouTubeVideoManager } from "contentdroplet/dist/YouTubeVideoManager.js";
 import { TaskDispatcher } from "./TaskDispatcher.js";
+import { GlobalLock } from "./GlobalLock.js";
 
 function enqueueCompletedTask(id: string, outputPath: string, title: string) {
     const globalQueueManager = GlobalQueueManager.getInstance();
@@ -52,12 +53,14 @@ export const workersManager = {
         globalQueueManager.process(
             DispatchVideoTaskScheduler.COMPLETED_TASKS_QUEUE,
             async (dequeued) => {
-                const { outputPath, title } = dequeued.payload;
-                const manager = new YouTubeVideoManager(
-                    outputPath,
-                    title.charAt(0).toUpperCase() + title.slice(1)
-                );
-                await manager.run();
+                await GlobalLock.getInstance().tryWithLock('browser_connect', async () => {
+                    const { outputPath, title } = dequeued.payload;
+                    const manager = new YouTubeVideoManager(
+                        outputPath,
+                        title.charAt(0).toUpperCase() + title.slice(1)
+                    );
+                    await manager.run();
+                }, 10 * 60, 1_000)
             }
         );
     }
