@@ -137,7 +137,7 @@ export class SyncChannelAnalyticsScheduler {
   /**
    * Starts the scheduled task and initializes YoutubeStudio
    */
-  public async start(): Promise<void> {
+  public async start([rangeStart, rangeEnd]: [number, number]): Promise<void> {
     if (this.task) {
       console.log('Scheduler already running.');
       return;
@@ -153,12 +153,14 @@ export class SyncChannelAnalyticsScheduler {
     await this.syncAnalytics();
 
     // Schedule future syncs
-    this.task = cron.schedule(this.scheduleTime, async () => {
-      console.log(`[${new Date().toISOString()}] Scheduled sync triggered.`);
-      await this.syncAnalytics();
-    });
-
-    console.log(`Sync Channel Analytics Scheduler started. Next scheduled run at ${this.scheduleTime}.`);
+    while(true) {
+      console.log((new Date).getMinutes())
+      if (rangeStart < (new Date).getMinutes() && (new Date).getMinutes() < rangeEnd) {
+        console.log(`[${new Date().toISOString()}] Scheduled sync triggered.`);
+        await this.syncAnalytics();
+      }
+      await new Promise(r => setTimeout(r, 60e3))
+    }
   }
 
   /**

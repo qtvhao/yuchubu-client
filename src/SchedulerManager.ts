@@ -11,11 +11,11 @@ export class SchedulerManager {
     process.on('SIGINT', this.handleShutdownSignal.bind(this));
   }
 
-  start(): void {
+  start(dispatchVideoTaskScheduleRange: [number, number], analyticsSyncScheduleRange: [number, number]): void {
     this.analyticsSyncScheduler.once('syncSuccess', () => {
-      this.dispatchVideoTaskScheduler.start()
+      this.dispatchVideoTaskScheduler.start(dispatchVideoTaskScheduleRange)
     });
-    this.analyticsSyncScheduler.start();
+    this.analyticsSyncScheduler.start(analyticsSyncScheduleRange);
   }
 
   private shutdownScheduler(exitCode: number = 0): void {

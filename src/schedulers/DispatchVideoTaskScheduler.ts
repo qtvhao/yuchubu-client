@@ -18,10 +18,15 @@ export class DispatchVideoTaskScheduler {
         this.emitter.on(event, callback);
     }
 
-    async start() {
+    async start([
+        scheduleStart,
+        scheduleEnd
+    ]: [number, number]) {
         while (true) {
-            await this.dispatch()
-            await new Promise(r => setTimeout(r, 60e3 * 15)) // 15 minutes
+            if (scheduleStart < (new Date).getMinutes() && (new Date).getMinutes() < scheduleEnd) {
+                await this.dispatch()
+            }
+            await new Promise(r => setTimeout(r, 60e3))
         }
     }
 
